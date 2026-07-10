@@ -1,29 +1,41 @@
-/**
- * @file attendance_system.ino
- * @brief ESP32 RFID Attendance System (Firmware Entrypoint)
- * 
- * @note This is a placeholder file. Firmware implementation will commence
- *       following successful hardware validation of the ESP32, the I2C OLED display,
- *       and the MFRC522 RFID reader (SPI communication debugging is currently in progress).
- * 
- * @author Ayaan
- * @date 2026-07-11
- */
+#include <SPI.h>
+#include <MFRC522.h>
+
+#define SS_PIN   5
+#define RST_PIN 22
+
+MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 void setup() {
-  // Serial interface initialization for diagnostics
   Serial.begin(115200);
+
   while (!Serial);
 
-  Serial.println("=================================================");
-  Serial.println("   ESP32 RFID Attendance System - Firmware");
-  Serial.println("=================================================");
-  Serial.println("[STATUS] Hardware validation and bring-up phase.");
-  Serial.println("[INFO] Core firmware logic is suspended until hardware is verified.");
-  Serial.println("=================================================");
+  Serial.println();
+  Serial.println("===== RC522 SPI Diagnostic =====");
+
+  SPI.begin(18, 19, 23, 5);
+
+  mfrc522.PCD_Init();
+
+  delay(100);
+
+  byte version = mfrc522.PCD_ReadRegister(mfrc522.VersionReg);
+
+  Serial.print("Version Register = 0x");
+  Serial.println(version, HEX);
+
+  if (version == 0x91)
+    Serial.println("MFRC522 detected");
+  else if (version == 0x92)
+    Serial.println("MFRC522 v2 detected");
+  else if (version == 0x88)
+    Serial.println("Clone detected");
+  else if (version == 0x00 || version == 0xFF)
+    Serial.println("SPI communication FAILED");
+  else
+    Serial.println("Unknown response");
 }
 
 void loop() {
-  // Main execution loop - placeholder
-  delay(1000);
 }
