@@ -4,7 +4,7 @@
 [![Language: C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B)](https://isocpp.org/)
 [![IDE: Arduino](https://img.shields.io/badge/IDE-Arduino-00979D?style=for-the-badge&logo=arduino)](https://www.arduino.cc/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-[![Status: Hardware Bring-up](https://img.shields.io/badge/Status-Hardware_Bring--up-red?style=for-the-badge)](docs/development/hardware_validation_log.md)
+[![Status: Firmware Development](https://img.shields.io/badge/Status-Firmware_Development-blue?style=for-the-badge)](docs/development/hardware_validation_log.md)
 
 A professional, modular RFID-based attendance logging system developed on the ESP32 platform. This project is built incrementally, prioritizing clean software engineering principles, clear hardware decoupling, documentation-first validation, and a clear path toward full network synchronization and dashboard analytics.
 
@@ -42,20 +42,23 @@ graph TD
     style E fill:#2ecc71,stroke:#27ae60,stroke-width:2px,color:#fff
 ```
 
-1. **Phase 1: Hardware Bring-Up (Current Phase)**
-   - Wire standard SPI/I2C buses on breadboard.
-   - Run low-level communication tests for SSD1306 and MFRC522.
-   - Resolve SPI bus version read register queries.
-2. **Phase 2: Local Core Firmware**
-   - Design Finite State Machine (FSM) structures.
-   - Manage local authorization data and local flash logging.
-3. **Phase 3: Wi-Fi & REST Sync**
-   - Implement network connectivity with offline cache preservation.
-   - Execute secure HTTPS payload transfers.
-4. **Phase 4: Database & API Backend**
-   - Store entries in centralized databases.
-5. **Phase 5: Web Administration Dashboard**
-   - Provide administrative registration and real-time logs dashboard.
+1. **Phase 1: Hardware Bring-Up (Completed)**
+   - [x] Wire standard SPI/I2C buses on breadboard.
+   - [x] Run low-level communication tests for SSD1306 and MFRC522.
+   - [x] Resolve SPI bus version read register queries.
+2. **Phase 2: Local Core Firmware (Active)**
+   - [x] **System Boot Sequence** (v0.3.0)
+   - [ ] **Card Registration Flow** (v0.4.0)
+   - [ ] **Local Authorization and NVS Attendance Logging** (v0.5.0)
+3. **Phase 3: Wi-Fi & REST Sync (Planned)**
+   - [ ] Establish stable Wi-Fi connection manager.
+   - [ ] Integrate local flash caching buffers for offline operations.
+   - [ ] Execute secure REST API payloads.
+4. **Phase 4: Database & API Backend (Planned)**
+   - [ ] Setup centralized attendance databases and REST server.
+5. **Phase 5: Web Administration Dashboard (Planned)**
+   - [ ] Deploy user administration management interface and metrics analytics.
+
 
 ---
 

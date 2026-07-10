@@ -1,12 +1,12 @@
 /**
  * @file attendance_system.ino
- * @brief ESP32 RFID Attendance System - Hardware Validation Sketch
+ * @brief ESP32 RFID Attendance System - System Boot Sequence (v0.3.0)
  * 
- * This sketch validates the SPI communication with the MFRC522 RFID reader
- * and the I2C communication with the SSD1306 OLED display. When a card is scanned,
- * it retrieves the UID, prints it to the Serial Monitor, and displays it on the OLED screen.
+ * Implements a structured initialization flow and boot sequence. Separates
+ * startup procedures into clean, modular functions and displays professional 
+ * status logs over Serial and the OLED screen.
  * 
- * Hardware Connections:
+ * Hardware Pin Connections:
  * - SSD1306 OLED: SDA -> GPIO 21, SCL -> GPIO 22 (I2C)
  * - MFRC522 RFID: SCK -> GPIO 18, MISO -> GPIO 19, MOSI -> GPIO 23, SS/SDA -> GPIO 5, RST -> GPIO 4 (SPI)
  * 
@@ -23,98 +23,142 @@
 // OLED Display Configuration
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
-#define OLED_RESET    -1 // Reset pin # (or -1 if sharing Arduino reset pin)
-#define SCREEN_ADDRESS 0x3C ///< See datasheet for Address; 0x3D or 0x3C
+#define OLED_RESET    -1
+#define SCREEN_ADDRESS 0x3C
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 // MFRC522 Configuration
-#define RST_PIN         4   // Configurable, typical: GPIO 4 to avoid I2C SCL conflicts
-#define SS_PIN          5   // VSPI Chip Select (SS)
+#define RST_PIN         4
+#define SS_PIN          5
+MFRC522 mfrc522(SS_PIN, RST_PIN);
 
-MFRC522 mfrc522(SS_PIN, RST_PIN); // Create MFRC522 instance
-
-// Function prototypes
+// Function Prototypes
+void initSerial();
+void initOLED();
+void initRFID();
+void showBootScreen();
+void showReadyScreen();
 void updateDisplay(const String& line1, const String& line2, const String& line3 = "");
-String getUIDString(MFRC522::Uid* uid);
 
 void setup() {
-  // Initialize serial communications with the PC
-  Serial.begin(115200);
-  while (!Serial); // Wait for serial port to connect. Needed for native USB port only
-  
-  Serial.println("\n=================================================");
-  Serial.println("   ESP32 RFID Attendance System - Validation");
-  Serial.println("=================================================");
+  // 1. Initialize Serial
+  initSerial();
 
-  // Initialize OLED Display
-  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-    Serial.println(F("[ERROR] SSD1306 allocation failed. Check I2C wiring."));
-    while (true); // Don't proceed, loop forever
-  }
-  
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
-  updateDisplay("System Init...", "Checking peripherals");
-  delay(1000);
+  // 2. Initialize OLED Display
+  initOLED();
 
-  // Initialize SPI bus
-  SPI.begin();
-  
-  // Initialize MFRC522 reader
-  mfrc522.PCD_Init();
-  delay(4); // Optional delay according to some board requirements
-  
-  // Read and print MFRC522 details to Serial
-  Serial.print(F("[INFO] MFRC522 Software Version: "));
-  mfrc522.PCD_DumpVersionToSerial();
-  
-  // Validate reader version to verify communication
-  byte version = mfrc522.PCD_ReadRegister(mfrc522.VersionReg);
-  if (version == 0x00 || version == 0xFF) {
-    Serial.println(F("[ERROR] Communication failure with MFRC522. Verify SPI wiring and power."));
-    updateDisplay("Hardware Error", "RC522 Not Found", "Check SPI wiring");
-    while (true); // Halt execution on hardware check failure
-  }
+  // 3. Display Boot Screen
+  showBootScreen();
+  delay(2000); // Allow user to read boot screen and simulate initialization delay
 
-  Serial.println(F("[SUCCESS] MFRC522 communication established."));
-  updateDisplay("System Status", "RFID: OK", "Awaiting card scan...");
+  // 4. Initialize RFID Reader
+  initRFID();
+
+  // 5. Display Ready Screen
+  showReadyScreen();
 }
 
 void loop() {
-  // Reset the loop if no new card is present on the sensor/reader. This saves power when idle.
-  if ( ! mfrc522.PICC_IsNewCardPresent()) {
-    return;
+  // Awaiting card scan in loop - placeholder for Phase 2 card registration / authorization logic
+  
+  if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
+    // Basic card scan feedback for verification
+    String cardUID = "";
+    for (byte i = 0; i < mfrc522.uid.size; i++) {
+      cardUID += String(mfrc522.uid.uidByte[i] < 0x10 ? "0" : "") + String(mfrc522.uid.uidByte[i], HEX) + " ";
+    }
+    cardUID.trim();
+    cardUID.toUpperCase();
+
+    Serial.print("[EVENT] Card Detected: ");
+    Serial.println(cardUID);
+
+    updateDisplay("Card Detected", "UID:", cardUID);
+    delay(2000);
+    showReadyScreen();
+
+    mfrc522.PICC_HaltA();
+    mfrc522.PCD_StopCrypto1();
   }
-
-  // Select one of the cards
-  if ( ! mfrc522.PICC_ReadCardSerial()) {
-    return;
-  }
-
-  // Retrieve UID and format
-  String cardUID = getUIDString(&(mfrc522.uid));
-  
-  // Print details to Serial Monitor
-  Serial.print(F("[EVENT] Card Detected! UID: "));
-  Serial.println(cardUID);
-  
-  // Display details on OLED
-  updateDisplay("Card Detected!", "UID:", cardUID);
-
-  // Halt PICC (Physical IC Card) and encryption
-  mfrc522.PICC_HaltA();
-  mfrc522.PCD_StopCrypto1();
-
-  // Keep display message visible for a short duration
-  delay(2000);
-  
-  // Reset view to standby
-  updateDisplay("System Status", "RFID: OK", "Awaiting card scan...");
 }
 
 /**
- * Helper function to output standard layout text to the SSD1306 display.
+ * Initializes the Serial interface and prints the boot sequence header.
+ */
+void initSerial() {
+  Serial.begin(115200);
+  while (!Serial);
+  Serial.println("========================================");
+  Serial.println("ESP32 RFID Attendance System");
+  Serial.println("Boot Sequence");
+  Serial.println("========================================");
+}
+
+/**
+ * Initializes the SSD1306 OLED display via I2C.
+ */
+void initOLED() {
+  if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+    Serial.println("[ERROR] OLED Display Initialization Failed.");
+    while (true); // Loop forever on initialization failure
+  }
+  display.clearDisplay();
+  display.setTextColor(SSD1306_WHITE);
+  Serial.println("[OK] OLED Display Initialized");
+}
+
+/**
+ * Renders the initial boot screen on the OLED.
+ */
+void showBootScreen() {
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 4);
+  display.println("ESP32 RFID");
+  display.println("Attendance System");
+  display.setCursor(0, 40);
+  display.println("Initializing...");
+  display.display();
+  Serial.println("[OK] Boot Screen Displayed");
+}
+
+/**
+ * Initializes the MFRC522 reader via SPI.
+ */
+void initRFID() {
+  SPI.begin();
+  mfrc522.PCD_Init();
+  
+  // Verify physical communication with the chip
+  byte version = mfrc522.PCD_ReadRegister(mfrc522.VersionReg);
+  if (version == 0x00 || version == 0xFF) {
+    Serial.println("[ERROR] MFRC522 RFID Reader Not Found. Halt.");
+    updateDisplay("System Error", "RFID Reader", "Initialization Failed");
+    while (true); // Halt loop
+  }
+  Serial.println("[OK] RFID Reader Initialized");
+}
+
+/**
+ * Renders the ready screen on the OLED and prints the ready status over Serial.
+ */
+void showReadyScreen() {
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setCursor(0, 4);
+  display.println("RFID Ready");
+  display.setCursor(0, 30);
+  display.println("Scan your card");
+  display.display();
+
+  Serial.println("\n========================================");
+  Serial.println("System Ready");
+  Serial.println("Waiting for RFID card...");
+  Serial.println("========================================");
+}
+
+/**
+ * Helper utility to render simple multi-line layouts to the display.
  */
 void updateDisplay(const String& line1, const String& line2, const String& line3) {
   display.clearDisplay();
@@ -123,32 +167,11 @@ void updateDisplay(const String& line1, const String& line2, const String& line3
   display.println(line1);
   
   display.setCursor(0, 24);
-  display.setTextSize(1);
   display.println(line2);
   
   if (line3.length() > 0) {
     display.setCursor(0, 44);
-    display.setTextSize(1);
     display.println(line3);
   }
-  
   display.display();
-}
-
-/**
- * Converts MFRC522 UID bytes into a standard space-separated hex String.
- */
-String getUIDString(MFRC522::Uid* uid) {
-  String uidStr = "";
-  for (byte i = 0; i < uid->size; i++) {
-    if (uid->uidByte[i] < 0x10) {
-      uidStr += "0";
-    }
-    uidStr += String(uid->uidByte[i], HEX);
-    if (i < uid->size - 1) {
-      uidStr += " ";
-    }
-  }
-  uidStr.toUpperCase();
-  return uidStr;
 }

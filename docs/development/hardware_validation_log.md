@@ -22,3 +22,6 @@ This document serves as the official bring-up and verification logbook for valid
   - Serial monitor prints exact card UIDs (e.g. `4 bytes hex: AA BB CC DD`).
   - OLED display successfully shows immediate card detection feedback and details UIDs.
 
+### Entry: 2026-07-11 - Transition to Active Firmware Development
+- **Summary**: Hardware verification successfully completed. All core peripherals (OLED display on I2C and RFID reader on SPI) are operational and communicating with the ESP32.
+- **Status**: Milestone v0.3.0 boot sequence has been implemented. The project has successfully transitioned from the initial hardware bring-up and validation phase into active application firmware development.
