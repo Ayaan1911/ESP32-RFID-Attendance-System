@@ -28,36 +28,41 @@ Embedded systems design in academic and hobbyist settings often relies on copy-p
 
 ## 📈 Development Roadmap
 
-```mermaid
-graph TD
-    A[Phase 1: Hardware Validation] --> B[Phase 2: Core Firmware]
-    B --> C[Phase 3: Networking & REST client]
-    C --> D[Phase 4: Backend Integration]
-    D --> E[Phase 5: Web Admin Dashboard]
+- ✅ Repository Scaffold
+- ✅ Hardware Validation
+- ✅ System Boot Sequence
+- ✅ RFID Service Refactoring
+- ⬜ User Registration
+- ⬜ Attendance Manager
+- ⬜ Duplicate Attendance Prevention
+- ⬜ Local Storage
+- ⬜ Wi-Fi Synchronization
+- ⬜ Backend
+- ⬜ Dashboard
 
-    style A fill:#e05a47,stroke:#a62b1b,stroke-width:2px,color:#fff
-    style B fill:#3498db,stroke:#2980b9,stroke-width:2px,color:#fff
-    style C fill:#f1c40f,stroke:#f39c12,stroke-width:2px,color:#fff
-    style D fill:#9b59b6,stroke:#8e44ad,stroke-width:2px,color:#fff
-    style E fill:#2ecc71,stroke:#27ae60,stroke-width:2px,color:#fff
+---
+
+## 🏛️ Current Firmware Architecture
+
+```mermaid
+graph LR
+    A[System Boot] --> B[RFID Service]
+    B --> C[Future Attendance Manager]
+    C --> D[Future Storage Layer]
+    D --> E[Future Network Layer]
+
+    style A fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
+    style B fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
+    style C fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
+    style D fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
+    style E fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
 ```
 
-1. **Phase 1: Hardware Bring-Up (Completed)**
-   - [x] Wire standard SPI/I2C buses on breadboard.
-   - [x] Run low-level communication tests for SSD1306 and MFRC522.
-   - [x] Resolve SPI bus version read register queries.
-2. **Phase 2: Local Core Firmware (Active)**
-   - [x] **System Boot Sequence** (v0.3.0)
-   - [ ] **Card Registration Flow** (v0.4.0)
-   - [ ] **Local Authorization and NVS Attendance Logging** (v0.5.0)
-3. **Phase 3: Wi-Fi & REST Sync (Planned)**
-   - [ ] Establish stable Wi-Fi connection manager.
-   - [ ] Integrate local flash caching buffers for offline operations.
-   - [ ] Execute secure REST API payloads.
-4. **Phase 4: Database & API Backend (Planned)**
-   - [ ] Setup centralized attendance databases and REST server.
-5. **Phase 5: Web Administration Dashboard (Planned)**
-   - [ ] Deploy user administration management interface and metrics analytics.
+This modular pipeline establishes that:
+1.  **System Boot** initializes components (Serial, OLED, RFID) and presents UI feedback.
+2.  **RFID Service** encapsulates scanning, detection, and raw UID formatting cleanly.
+3.  **Future layers** can plug directly into the structured callbacks of the RFID service without altering reader logic.
+
 
 
 ---

@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.4.0
+
+### Refactored
+
+- Refactored RFID processing into dedicated service functions.
+- Added `processRFID()`.
+- Added `isCardPresent()`.
+- Added `getCardUID()`.
+- Added `handleCard()`.
+- Improved firmware readability.
+- Improved maintainability.
+- Applied the Single Responsibility Principle.
+- No functional behavior changed.
+
 ## v0.3.0
 
 - Implemented structured firmware boot architecture

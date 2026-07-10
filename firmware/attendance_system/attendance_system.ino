@@ -1,10 +1,10 @@
 /**
  * @file attendance_system.ino
- * @brief ESP32 RFID Attendance System - System Boot Sequence (v0.3.0)
+ * @brief ESP32 RFID Attendance System - RFID Service Refactoring (v0.4.0)
  * 
- * Implements a structured initialization flow and boot sequence. Separates
- * startup procedures into clean, modular functions and displays professional 
- * status logs over Serial and the OLED screen.
+ * Refactors the RFID card processing logic into a service-oriented structure.
+ * Breaks down card detection, UID extraction, and UI/Serial handling into
+ * modular service functions following the Single Responsibility Principle.
  * 
  * Hardware Pin Connections:
  * - SSD1306 OLED: SDA -> GPIO 21, SCL -> GPIO 22 (I2C)
@@ -32,13 +32,19 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define SS_PIN          5
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
-// Function Prototypes
+// Function Prototypes - System Boot
 void initSerial();
 void initOLED();
 void initRFID();
 void showBootScreen();
 void showReadyScreen();
 void updateDisplay(const String& line1, const String& line2, const String& line3 = "");
+
+// Function Prototypes - RFID Service
+void processRFID();
+bool isCardPresent();
+String getCardUID();
+void handleCard(const String& cardUID);
 
 void setup() {
   // 1. Initialize Serial
@@ -59,27 +65,79 @@ void setup() {
 }
 
 void loop() {
-  // Awaiting card scan in loop - placeholder for Phase 2 card registration / authorization logic
-  
-  if (mfrc522.PICC_IsNewCardPresent() && mfrc522.PICC_ReadCardSerial()) {
-    // Basic card scan feedback for verification
-    String cardUID = "";
-    for (byte i = 0; i < mfrc522.uid.size; i++) {
-      cardUID += String(mfrc522.uid.uidByte[i] < 0x10 ? "0" : "") + String(mfrc522.uid.uidByte[i], HEX) + " ";
+  // Run the RFID processing service on every loop iteration
+  processRFID();
+}
+
+/**
+ * Controls the RFID processing workflow.
+ */
+void processRFID() {
+  if (isCardPresent()) {
+    String cardUID = getCardUID();
+    if (cardUID.length() > 0) {
+      handleCard(cardUID);
     }
-    cardUID.trim();
-    cardUID.toUpperCase();
-
-    Serial.print("[EVENT] Card Detected: ");
-    Serial.println(cardUID);
-
-    updateDisplay("Card Detected", "UID:", cardUID);
-    delay(2000);
-    showReadyScreen();
-
-    mfrc522.PICC_HaltA();
-    mfrc522.PCD_StopCrypto1();
   }
+}
+
+/**
+ * Detects whether a new RFID card has been scanned.
+ * @return True if a card is present and read successfully, false otherwise.
+ */
+bool isCardPresent() {
+  // Check if a new card is physically present on the reader
+  if (!mfrc522.PICC_IsNewCardPresent()) {
+    return false;
+  }
+  // Read the card serial number details
+  if (!mfrc522.PICC_ReadCardSerial()) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Extracts and formats the UID from the scanned card.
+ * @return Formatted space-separated uppercase hex String.
+ */
+String getCardUID() {
+  String uidStr = "";
+  for (byte i = 0; i < mfrc522.uid.size; i++) {
+    if (mfrc522.uid.uidByte[i] < 0x10) {
+      uidStr += "0";
+    }
+    uidStr += String(mfrc522.uid.uidByte[i], HEX);
+    if (i < mfrc522.uid.size - 1) {
+      uidStr += " ";
+    }
+  }
+  uidStr.toUpperCase();
+  return uidStr;
+}
+
+/**
+ * Handles presentation and callback operations for a validated card UID.
+ * Prints logs to Serial, updates OLED output, and halts card communications.
+ * @param cardUID The formatted card UID string to handle.
+ */
+void handleCard(const String& cardUID) {
+  // Log event to Serial Monitor
+  Serial.print("[EVENT] Card Detected: ");
+  Serial.println(cardUID);
+
+  // Update display visual output
+  updateDisplay("Card Detected", "UID:", cardUID);
+
+  // Halt PICC and stop encryption to prevent multiple scans
+  mfrc522.PICC_HaltA();
+  mfrc522.PCD_StopCrypto1();
+
+  // Display scan confirmation feedback
+  delay(2000);
+
+  // Return screen to standby ready mode
+  showReadyScreen();
 }
 
 /**

@@ -25,3 +25,8 @@ This document serves as the official bring-up and verification logbook for valid
 ### Entry: 2026-07-11 - Transition to Active Firmware Development
 - **Summary**: Hardware verification successfully completed. All core peripherals (OLED display on I2C and RFID reader on SPI) are operational and communicating with the ESP32.
 - **Status**: Milestone v0.3.0 boot sequence has been implemented. The project has successfully transitioned from the initial hardware bring-up and validation phase into active application firmware development.
+
+### Entry: 2026-07-11 - RFID Service Refactoring (Milestone v0.4.0)
+- **Summary**: Refactored card detection, read, and display logic out of the global Arduino `loop()` into decoupled service modules (`processRFID()`, `isCardPresent()`, `getCardUID()`, and `handleCard()`).
+- **Verification**: Verified compilation and execution on target hardware. System bootup and card scan behavior remains identical, but code is now cleanly structured to support future state transitions and database check policies.
+
