@@ -1,0 +1,37 @@
+# --- Arduino IDE ---
+# Temporary build files
+.vscode/arduino.json
+*.hex
+*.elf
+*.bin
+*.d
+*.o
+
+# --- PlatformIO ---
+.pio/
+.pioenvs/
+.piolibdeps/
+.clang_complete
+.gcc-flags.json
+platformio.ini.bak
+lib/README
+
+# --- VS Code ---
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.history/
+*.code-workspace
+
+# --- OS-specific ---
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Backup/Temporary files ---
+*~
+*.bak
+*.tmp
+*.log
