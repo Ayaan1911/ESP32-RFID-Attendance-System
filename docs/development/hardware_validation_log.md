@@ -41,3 +41,12 @@ This document serves as the official bring-up and verification logbook for valid
   - Verified no regressions in communication stability over SPI and I2C buses.
 - **Status**: Completed firmware foundation and prepared the project for the upcoming User Management phase.
 
+### Entry: 2026-07-16 - User Management & RFID Authentication (Milestone v0.6.0) [SUCCESS]
+- **Summary**: Implemented an in-memory user database, user data model (`User` struct), and lookup system (`findUserByUID()`). Integrated authentication checks in the attendance processing loop.
+- **Results & Verification**:
+  - Successfully compiled the firmware and uploaded it to the physical ESP32 target hardware.
+  - Verified that scanning a registered RFID card (`DB 1D 29 07`) successfully prints `[SUCCESS] Attendance Marked: Ayaan` on Serial and updates the SSD1306 OLED screen with a personalized welcome message: `Welcome`, `Ayaan`, `Attendance Marked`.
+  - Verified that scanning an unregistered RFID card displays `Unknown Card` and `Access Denied` on the OLED screen and outputs `[ERROR] Unknown Card` via Serial.
+  - Confirmed lookups are performant and error-free with the in-memory array database.
+- **Status**: The hardware successfully authenticates users against the internal database. Prepared the project for the upcoming Duplicate Attendance Prevention features.
+

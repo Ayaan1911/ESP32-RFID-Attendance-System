@@ -1,5 +1,18 @@
 # Changelog
 
+## v0.6.0
+
+### Added
+
+- User data model
+- User database
+- User lookup service
+- User search by RFID UID
+- Registered user authentication
+- Unknown card detection
+- Personalized OLED messages
+- User-aware attendance workflow
+
 ## v0.5.0
 
 ### Added

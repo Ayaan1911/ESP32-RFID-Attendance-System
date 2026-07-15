@@ -40,6 +40,22 @@ enum SystemMode
 
 SystemMode currentMode = ATTENDANCE_MODE;
 
+struct User
+{
+    String uid;
+    String name;
+};
+
+const int MAX_USERS = 10;
+
+User users[MAX_USERS] =
+{
+    {"DB 1D 29 07", "Ayaan"},
+    {"A1 B2 C3 D4", "Demo User"}
+};
+
+int registeredUsers = 2;
+
 // Function Prototypes - System Boot
 void initSerial();
 void initOLED();
@@ -58,6 +74,9 @@ void handleCard(const String& cardUID);
 void processCard(const String &uid);
 void registerCard(const String &uid);
 void markAttendance(const String &uid);
+
+// User Manager
+User* findUserByUID(const String &uid);
 
 void setup() {
   // 1. Initialize Serial
@@ -258,12 +277,40 @@ void registerCard(const String &uid)
 
 void markAttendance(const String &uid)
 {
-    Serial.print("[EVENT] Card Detected: ");
-    Serial.println(uid);
+    User *user = findUserByUID(uid);
 
-    updateDisplay("Card Detected", "UID:", uid);
+    if (user == nullptr)
+    {
+        updateDisplay("Unknown Card", "Access Denied");
+
+        Serial.println("[ERROR] Unknown Card");
+
+        delay(2000);
+
+        showReadyScreen();
+
+        return;
+    }
+
+    updateDisplay("Welcome", user->name, "Attendance Marked");
+
+    Serial.print("[SUCCESS] Attendance Marked: ");
+    Serial.println(user->name);
 
     delay(2000);
 
     showReadyScreen();
+}
+
+User* findUserByUID(const String &uid)
+{
+    for (int i = 0; i < registeredUsers; i++)
+    {
+        if (users[i].uid == uid)
+        {
+            return &users[i];
+        }
+    }
+
+    return nullptr;
 }

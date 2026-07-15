@@ -14,6 +14,11 @@ A professional, modular RFID-based attendance logging system developed on the ES
 
 The ESP32 RFID Attendance System aims to deliver a resume-quality, robust IoT system. The initial hardware setup features an ESP32 microcontroller, an SPI-based MFRC522 RFID reader, and an I2C-based SSD1306 OLED display. Starting from hardware bring-up and physical verification, this repository will evolve to encompass local caching, encrypted credentials database storage, Wi-Fi networking, a REST API client, and a remote management dashboard.
 
+### ✨ Key Features (Firmware)
+- **Registered User Authentication**: Validates scanned card UIDs against an internal user database.
+- **Unknown Card Rejection**: Instantly rejects unregistered cards to prevent unauthorized logging.
+- **OLED User Feedback**: Displays personalized greeting messages and attendance status.
+
 ---
 
 ## 💡 Motivation
@@ -33,8 +38,7 @@ Embedded systems design in academic and hobbyist settings often relies on copy-p
 - ✅ System Boot Sequence
 - ✅ RFID Service
 - ✅ Application Controller
-- ⬜ User Management
-- ⬜ Attendance Engine
+- ✅ User Management System
 - ⬜ Duplicate Attendance Prevention
 - ⬜ Persistent Storage
 - ⬜ Wi-Fi Synchronization
@@ -50,7 +54,7 @@ graph TD
     A[Hardware Layer] --> B[Initialization Layer]
     B --> C[RFID Service]
     C --> D[Application Controller]
-    D --> E[Future User Manager]
+    D --> E[User Manager]
     E --> F[Future Attendance Engine]
     F --> G[Future Storage Layer]
     G --> H[Future Network Layer]
@@ -59,7 +63,7 @@ graph TD
     style B fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style C fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style D fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style E fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
+    style E fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style F fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
     style G fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
     style H fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
@@ -70,7 +74,8 @@ This modular pipeline establishes that:
 2.  **Initialization Layer** configures system interfaces (Serial, I2C, SPI) and displays booting screens.
 3.  **RFID Service** encapsulates card detection, scanning, and raw UID extraction.
 4.  **Application Controller** routes the card UID based on system mode (Attendance or Registration).
-5.  **Future layers** will implement local databases, attendance rules, storage, and cloud synchronization.
+5.  **User Manager** manages the user registry and handles UID-to-user lookups.
+6.  **Future layers** will implement attendance rules, storage, and cloud synchronization.
 
 
 
