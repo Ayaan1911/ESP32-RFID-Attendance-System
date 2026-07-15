@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.7.0
+
+### Added
+
+- Duplicate attendance prevention
+- Attendance state tracking
+- Attendance session management
+
+### Improved
+
+- User attendance workflow
+- OLED attendance feedback
+- Serial attendance logs
+
 ## v0.6.0
 
 ### Added

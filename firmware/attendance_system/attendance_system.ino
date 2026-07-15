@@ -44,14 +44,15 @@ struct User
 {
     String uid;
     String name;
+    bool attendanceMarked;
 };
 
 const int MAX_USERS = 10;
 
 User users[MAX_USERS] =
 {
-    {"DB 1D 29 07", "Ayaan"},
-    {"A1 B2 C3 D4", "Demo User"}
+    {"DB 1D 29 07", "Ayaan", false},
+    {"A1 B2 C3 D4", "Demo User", false}
 };
 
 int registeredUsers = 2;
@@ -279,18 +280,22 @@ void markAttendance(const String &uid)
 {
     User *user = findUserByUID(uid);
 
-    if (user == nullptr)
-    {
-        updateDisplay("Unknown Card", "Access Denied");
+    if (user->attendanceMarked){
 
-        Serial.println("[ERROR] Unknown Card");
+    updateDisplay("Welcome Back", user->name, "Already Marked");
 
-        delay(2000);
+    Serial.print("[INFO] Attendance already marked for ");
+    Serial.println(user->name);
 
-        showReadyScreen();
+    delay(2000);
 
-        return;
-    }
+    showReadyScreen();
+
+    return;
+}
+
+// First attendance
+    user->attendanceMarked = true;
 
     updateDisplay("Welcome", user->name, "Attendance Marked");
 

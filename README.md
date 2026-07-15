@@ -38,8 +38,8 @@ Embedded systems design in academic and hobbyist settings often relies on copy-p
 - ✅ System Boot Sequence
 - ✅ RFID Service
 - ✅ Application Controller
-- ✅ User Management System
-- ⬜ Duplicate Attendance Prevention
+- ✅ User Management
+- ✅ Duplicate Attendance Prevention
 - ⬜ Persistent Storage
 - ⬜ Wi-Fi Synchronization
 - ⬜ Backend API
@@ -55,7 +55,7 @@ graph TD
     B --> C[RFID Service]
     C --> D[Application Controller]
     D --> E[User Manager]
-    E --> F[Future Attendance Engine]
+    E --> F[Attendance Engine]
     F --> G[Future Storage Layer]
     G --> H[Future Network Layer]
 
@@ -64,7 +64,7 @@ graph TD
     style C fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style D fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style E fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style F fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
+    style F fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style G fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
     style H fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
 ```
@@ -75,7 +75,8 @@ This modular pipeline establishes that:
 3.  **RFID Service** encapsulates card detection, scanning, and raw UID extraction.
 4.  **Application Controller** routes the card UID based on system mode (Attendance or Registration).
 5.  **User Manager** manages the user registry and handles UID-to-user lookups.
-6.  **Future layers** will implement attendance rules, storage, and cloud synchronization.
+6.  **Attendance Engine** enforces business rules including duplicate attendance prevention per session.
+7.  **Future layers** will implement persistent storage and cloud synchronization.
 
 
 

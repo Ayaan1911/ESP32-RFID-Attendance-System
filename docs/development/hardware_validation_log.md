@@ -50,3 +50,15 @@ This document serves as the official bring-up and verification logbook for valid
   - Confirmed lookups are performant and error-free with the in-memory array database.
 - **Status**: The hardware successfully authenticates users against the internal database. Prepared the project for the upcoming Duplicate Attendance Prevention features.
 
+### Entry: 2026-07-16 - Duplicate Attendance Prevention (Milestone v0.7.0) [SUCCESS]
+- **Summary**: Extended the `User` struct with an `attendanceMarked` boolean flag. Updated `markAttendance()` to check the flag before processing a scan. Attendance state is held in RAM and resets on device power loss or restart, which is the expected session-scoped behavior for this milestone.
+- **Results & Verification**:
+  - Successfully compiled the firmware and uploaded it to the physical ESP32 target hardware.
+  - **First scan**: Scanning a registered card produces `[SUCCESS] Attendance Marked: Ayaan` on Serial and displays `Welcome`, `Ayaan`, `Attendance Marked` on the OLED.
+  - **Duplicate scan**: Scanning the same card a second time produces `[INFO] Attendance already marked for Ayaan` on Serial and displays `Welcome Back`, `Ayaan`, `Already Marked` on the OLED.
+  - **Power cycle**: Restarting the ESP32 correctly resets all `attendanceMarked` flags, allowing fresh attendance marking for the new session as expected.
+  - Confirmed no regressions in unknown card rejection or boot sequence behavior.
+- **Note**: Attendance state is volatile (stored in RAM only). Data does not persist across power cycles. Persistent storage is planned for the next milestone.
+- **Status**: Business rule enforcement is operational. Prepared the project for the upcoming Persistent Storage phase.
+
+
