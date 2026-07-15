@@ -32,6 +32,14 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define SS_PIN          5
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
+enum SystemMode
+{
+    ATTENDANCE_MODE,
+    REGISTRATION_MODE
+};
+
+SystemMode currentMode = ATTENDANCE_MODE;
+
 // Function Prototypes - System Boot
 void initSerial();
 void initOLED();
@@ -45,6 +53,11 @@ void processRFID();
 bool isCardPresent();
 String getCardUID();
 void handleCard(const String& cardUID);
+
+// Application Controller
+void processCard(const String &uid);
+void registerCard(const String &uid);
+void markAttendance(const String &uid);
 
 void setup() {
   // 1. Initialize Serial
@@ -121,23 +134,9 @@ String getCardUID() {
  * Prints logs to Serial, updates OLED output, and halts card communications.
  * @param cardUID The formatted card UID string to handle.
  */
-void handleCard(const String& cardUID) {
-  // Log event to Serial Monitor
-  Serial.print("[EVENT] Card Detected: ");
-  Serial.println(cardUID);
-
-  // Update display visual output
-  updateDisplay("Card Detected", "UID:", cardUID);
-
-  // Halt PICC and stop encryption to prevent multiple scans
-  mfrc522.PICC_HaltA();
-  mfrc522.PCD_StopCrypto1();
-
-  // Display scan confirmation feedback
-  delay(2000);
-
-  // Return screen to standby ready mode
-  showReadyScreen();
+void handleCard(const String &uid)
+{
+    processCard(uid);
 }
 
 /**
@@ -232,4 +231,39 @@ void updateDisplay(const String& line1, const String& line2, const String& line3
     display.println(line3);
   }
   display.display();
+}
+
+void processCard(const String &uid)
+{
+    if (currentMode == REGISTRATION_MODE)
+    {
+        registerCard(uid);
+    }
+    else
+    {
+        markAttendance(uid);
+    }
+}
+
+void registerCard(const String &uid)
+{
+    Serial.println("[MODE] Registration Mode");
+
+    updateDisplay("Registration", "Coming Soon");
+
+    delay(2000);
+
+    showReadyScreen();
+}
+
+void markAttendance(const String &uid)
+{
+    Serial.print("[EVENT] Card Detected: ");
+    Serial.println(uid);
+
+    updateDisplay("Card Detected", "UID:", uid);
+
+    delay(2000);
+
+    showReadyScreen();
 }

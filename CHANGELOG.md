@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.5.0
+
+### Added
+
+- Application Controller layer
+- System mode architecture
+- Registration mode placeholder
+- Attendance mode placeholder
+
+### Refactored
+
+- handleCard() now delegates to processCard().
+- RFID Service is now independent of application logic.
+- Improved firmware layering.
+- Improved scalability for future features.
+
 ## v0.4.0
 
 ### Refactored

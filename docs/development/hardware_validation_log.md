@@ -30,3 +30,14 @@ This document serves as the official bring-up and verification logbook for valid
 - **Summary**: Refactored card detection, read, and display logic out of the global Arduino `loop()` into decoupled service modules (`processRFID()`, `isCardPresent()`, `getCardUID()`, and `handleCard()`).
 - **Verification**: Verified compilation and execution on target hardware. System bootup and card scan behavior remains identical, but code is now cleanly structured to support future state transitions and database check policies.
 
+### Entry: 2026-07-16 - Application Controller Integration (Milestone v0.5.0) [SUCCESS]
+- **Summary**: Integrated the Application Controller layer to decouple RFID service scanning from high-level state decisions. Introduced a FSM-like system mode state (`SystemMode`) with initial support for `ATTENDANCE_MODE` and `REGISTRATION_MODE`.
+- **Results & Verification**:
+  - Successfully compiled the firmware and uploaded it to the physical ESP32 target hardware.
+  - Verified boot sequence behaves as expected with SSD1306 displaying the ready state.
+  - RFID scanning functions normally, extracting UIDs and delegating to the `processCard()` application controller.
+  - Attendance mode successfully prints scans and shows card UID details on the OLED screen.
+  - Registration mode routing acts as a placeholder screen showing "Coming Soon".
+  - Verified no regressions in communication stability over SPI and I2C buses.
+- **Status**: Completed firmware foundation and prepared the project for the upcoming User Management phase.
+

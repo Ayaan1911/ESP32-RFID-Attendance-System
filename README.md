@@ -31,37 +31,46 @@ Embedded systems design in academic and hobbyist settings often relies on copy-p
 - ✅ Repository Scaffold
 - ✅ Hardware Validation
 - ✅ System Boot Sequence
-- ✅ RFID Service Refactoring
-- ⬜ User Registration
-- ⬜ Attendance Manager
+- ✅ RFID Service
+- ✅ Application Controller
+- ⬜ User Management
+- ⬜ Attendance Engine
 - ⬜ Duplicate Attendance Prevention
-- ⬜ Local Storage
+- ⬜ Persistent Storage
 - ⬜ Wi-Fi Synchronization
-- ⬜ Backend
-- ⬜ Dashboard
+- ⬜ Backend API
+- ⬜ Web Dashboard
 
 ---
 
 ## 🏛️ Current Firmware Architecture
 
 ```mermaid
-graph LR
-    A[System Boot] --> B[RFID Service]
-    B --> C[Future Attendance Manager]
-    C --> D[Future Storage Layer]
-    D --> E[Future Network Layer]
+graph TD
+    A[Hardware Layer] --> B[Initialization Layer]
+    B --> C[RFID Service]
+    C --> D[Application Controller]
+    D --> E[Future User Manager]
+    E --> F[Future Attendance Engine]
+    F --> G[Future Storage Layer]
+    G --> H[Future Network Layer]
 
     style A fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style B fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style C fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
-    style D fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
+    style C fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
+    style D fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style E fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
+    style F fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
+    style G fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
+    style H fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
 ```
 
 This modular pipeline establishes that:
-1.  **System Boot** initializes components (Serial, OLED, RFID) and presents UI feedback.
-2.  **RFID Service** encapsulates scanning, detection, and raw UID formatting cleanly.
-3.  **Future layers** can plug directly into the structured callbacks of the RFID service without altering reader logic.
+1.  **Hardware Layer** represents the physical peripherals (ESP32, MFRC522, SSD1306).
+2.  **Initialization Layer** configures system interfaces (Serial, I2C, SPI) and displays booting screens.
+3.  **RFID Service** encapsulates card detection, scanning, and raw UID extraction.
+4.  **Application Controller** routes the card UID based on system mode (Attendance or Registration).
+5.  **Future layers** will implement local databases, attendance rules, storage, and cloud synchronization.
 
 
 
