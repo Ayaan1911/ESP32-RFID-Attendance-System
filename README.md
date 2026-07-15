@@ -40,7 +40,10 @@ Embedded systems design in academic and hobbyist settings often relies on copy-p
 - ✅ Application Controller
 - ✅ User Management
 - ✅ Duplicate Attendance Prevention
+- ✅ Admin Mode
+- ⬜ Dynamic User Registration
 - ⬜ Persistent Storage
+- ⬜ Attendance Logs
 - ⬜ Wi-Fi Synchronization
 - ⬜ Backend API
 - ⬜ Web Dashboard
@@ -54,10 +57,12 @@ graph TD
     A[Hardware Layer] --> B[Initialization Layer]
     B --> C[RFID Service]
     C --> D[Application Controller]
-    D --> E[User Manager]
-    E --> F[Attendance Engine]
-    F --> G[Future Storage Layer]
-    G --> H[Future Network Layer]
+    D --> E[Attendance Mode]
+    D --> F[Admin Mode]
+    E --> G[Future Registration Manager]
+    F --> G
+    G --> H[Future Storage Layer]
+    H --> I[Future Network Layer]
 
     style A fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style B fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
@@ -67,16 +72,17 @@ graph TD
     style F fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style G fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
     style H fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
+    style I fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
 ```
 
 This modular pipeline establishes that:
 1.  **Hardware Layer** represents the physical peripherals (ESP32, MFRC522, SSD1306).
 2.  **Initialization Layer** configures system interfaces (Serial, I2C, SPI) and displays booting screens.
 3.  **RFID Service** encapsulates card detection, scanning, and raw UID extraction.
-4.  **Application Controller** routes the card UID based on system mode (Attendance or Registration).
-5.  **User Manager** manages the user registry and handles UID-to-user lookups.
-6.  **Attendance Engine** enforces business rules including duplicate attendance prevention per session.
-7.  **Future layers** will implement persistent storage and cloud synchronization.
+4.  **Application Controller** dispatches to the correct operating mode based on system state and card identity.
+5.  **Attendance Mode** handles user authentication, duplicate prevention, and attendance marking.
+6.  **Admin Mode** detects the administrator card and provides access to privileged operations.
+7.  **Future layers** will implement dynamic user registration, persistent storage, and cloud synchronization.
 
 
 

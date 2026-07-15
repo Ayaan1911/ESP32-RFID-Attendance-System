@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.8.0
+
+### Added
+
+- Admin operating mode
+- Administrator RFID card detection
+- Admin UID configuration
+- Admin mode switching
+
+### Improved
+
+- Multi-mode firmware architecture
+- Separation between attendance workflow and administrative workflow
+
 ## v0.7.0
 
 ### Added

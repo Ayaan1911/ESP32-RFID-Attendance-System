@@ -61,4 +61,16 @@ This document serves as the official bring-up and verification logbook for valid
 - **Note**: Attendance state is volatile (stored in RAM only). Data does not persist across power cycles. Persistent storage is planned for the next milestone.
 - **Status**: Business rule enforcement is operational. Prepared the project for the upcoming Persistent Storage phase.
 
+### Entry: 2026-07-16 - Admin Mode & RFID-Based Mode Switching (Milestone v0.8.0) [SUCCESS]
+- **Summary**: Introduced `ADMIN_MODE` to the `SystemMode` enum and a configurable `ADMIN_UID` constant. Added `isAdminCard()` helper. Updated `processCard()` to detect the administrator card and transition the system into Admin Mode. After the placeholder admin operation, the firmware automatically returns to `ATTENDANCE_MODE`.
+- **Results & Verification**:
+  - Successfully compiled the firmware and uploaded it to the physical ESP32 target hardware.
+  - **Student card scan**: Registered student cards continue to mark attendance normally. OLED displays `Welcome`, `<Name>`, `Attendance Marked`. No regression observed.
+  - **Admin card — first scan**: Scanning the designated admin card (`DB 1D 29 07`) triggers `[MODE] Switched to ADMIN MODE` on Serial and shows `ADMIN MODE` / `Scan New Card` on the OLED.
+  - **Admin card — operation**: Any subsequent scan while in Admin Mode displays `ADMIN MODE` / `Coming Soon` on the OLED and prints `[ADMIN] Registration module not implemented yet.` on Serial, then automatically returns to Attendance Mode.
+  - **Unknown card**: Unknown cards continue to be rejected with `Unknown Card` / `Access Denied` on the OLED.
+  - Confirmed no regressions in duplicate-prevention, boot sequence, or OLED rendering.
+- **Status**: Multi-mode firmware architecture is operational. Prepared the project for the upcoming Dynamic User Registration phase.
+
+
 

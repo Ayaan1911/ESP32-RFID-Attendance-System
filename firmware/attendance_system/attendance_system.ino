@@ -35,24 +35,27 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 enum SystemMode
 {
     ATTENDANCE_MODE,
+    ADMIN_MODE,
     REGISTRATION_MODE
 };
 
 SystemMode currentMode = ATTENDANCE_MODE;
+const String ADMIN_UID = "DB 1D 29 07";
 
 struct User
 {
     String uid;
     String name;
     bool attendanceMarked;
+    bool registered;
 };
 
 const int MAX_USERS = 10;
 
 User users[MAX_USERS] =
 {
-    {"DB 1D 29 07", "Ayaan", false},
-    {"A1 B2 C3 D4", "Demo User", false}
+    {"DB 1D 29 07", "Ayaan", false, true},
+    {"A1 B2 C3 D4", "Demo User", false, true}
 };
 
 int registeredUsers = 2;
@@ -78,6 +81,7 @@ void markAttendance(const String &uid);
 
 // User Manager
 User* findUserByUID(const String &uid);
+bool isAdminCard(const String &uid);
 
 void setup() {
   // 1. Initialize Serial
@@ -255,6 +259,20 @@ void updateDisplay(const String& line1, const String& line2, const String& line3
 
 void processCard(const String &uid)
 {
+    // Admin card scanned while in Attendance Mode
+    if (currentMode == ATTENDANCE_MODE && isAdminCard(uid))
+    {
+        currentMode = ADMIN_MODE;
+
+        updateDisplay("ADMIN MODE", "", "Scan New Card");
+
+        Serial.println("[MODE] Switched to ADMIN MODE");
+
+        delay(2000);
+
+        return;
+    }
+
     if (currentMode == REGISTRATION_MODE)
     {
         registerCard(uid);
@@ -278,6 +296,20 @@ void registerCard(const String &uid)
 
 void markAttendance(const String &uid)
 {
+  if (currentMode == ADMIN_MODE){
+    updateDisplay("ADMIN MODE", "", "Coming Soon");
+
+    Serial.println("[ADMIN] Registration module not implemented yet.");
+
+    delay(2000);
+
+    showReadyScreen();
+
+    currentMode = ATTENDANCE_MODE;
+
+    return;
+    }
+
     User *user = findUserByUID(uid);
 
     if (user->attendanceMarked){
@@ -318,4 +350,9 @@ User* findUserByUID(const String &uid)
     }
 
     return nullptr;
+}
+
+bool isAdminCard(const String &uid)
+{
+    return uid == ADMIN_UID;
 }
