@@ -41,8 +41,9 @@ Embedded systems design in academic and hobbyist settings often relies on copy-p
 - ✅ User Management
 - ✅ Duplicate Attendance Prevention
 - ✅ Admin Mode
-- ⬜ Dynamic User Registration
-- ⬜ Persistent Storage
+- ✅ Dynamic User Registration
+- ⬜ Duplicate User Registration Prevention
+- ⬜ Persistent Storage (EEPROM/Preferences)
 - ⬜ Attendance Logs
 - ⬜ Wi-Fi Synchronization
 - ⬜ Backend API
@@ -58,10 +59,10 @@ graph TD
     B --> C[RFID Service]
     C --> D[Application Controller]
     D --> E[Attendance Mode]
-    D --> F[Admin Mode]
-    E --> G[Future Registration Manager]
+    D --> F[Registration Mode]
+    E --> G[User Manager]
     F --> G
-    G --> H[Future Storage Layer]
+    G --> H[Future Persistent Storage]
     H --> I[Future Network Layer]
 
     style A fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
@@ -70,7 +71,7 @@ graph TD
     style D fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style E fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style F fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style G fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
+    style G fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style H fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
     style I fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
 ```
@@ -81,8 +82,9 @@ This modular pipeline establishes that:
 3.  **RFID Service** encapsulates card detection, scanning, and raw UID extraction.
 4.  **Application Controller** dispatches to the correct operating mode based on system state and card identity.
 5.  **Attendance Mode** handles user authentication, duplicate prevention, and attendance marking.
-6.  **Admin Mode** detects the administrator card and provides access to privileged operations.
-7.  **Future layers** will implement dynamic user registration, persistent storage, and cloud synchronization.
+6.  **Registration Mode** accepts new RFID cards and captures user name input via Serial Monitor at runtime.
+7.  **User Manager** maintains the in-memory user database shared by both modes.
+8.  **Future layers** will implement persistent storage and cloud synchronization.
 
 
 

@@ -82,6 +82,7 @@ void markAttendance(const String &uid);
 // User Manager
 User* findUserByUID(const String &uid);
 bool isAdminCard(const String &uid);
+String readNameFromSerial();
 
 void setup() {
   // 1. Initialize Serial
@@ -262,13 +263,11 @@ void processCard(const String &uid)
     // Admin card scanned while in Attendance Mode
     if (currentMode == ATTENDANCE_MODE && isAdminCard(uid))
     {
-        currentMode = ADMIN_MODE;
+        currentMode = REGISTRATION_MODE;
 
-        updateDisplay("ADMIN MODE", "", "Scan New Card");
+        updateDisplay("REGISTER USER", "", "Scan New Card");
 
-        Serial.println("[MODE] Switched to ADMIN MODE");
-
-        delay(2000);
+        Serial.println("[MODE] Registration Mode");
 
         return;
     }
@@ -285,13 +284,40 @@ void processCard(const String &uid)
 
 void registerCard(const String &uid)
 {
-    Serial.println("[MODE] Registration Mode");
+    if (registeredUsers >= MAX_USERS)
+    {
+        updateDisplay("Database Full", "Full", "");
 
-    updateDisplay("Registration", "Coming Soon");
+        Serial.println("[ERROR] User database is full.");
+
+        delay(2000);
+
+        showReadyScreen();
+
+        currentMode = ATTENDANCE_MODE;
+
+        return;
+    }
+
+    String name = readNameFromSerial();
+
+    users[registeredUsers].uid = uid;
+    users[registeredUsers].name = name;
+    users[registeredUsers].attendanceMarked = false;
+    users[registeredUsers].registered = true;
+
+    registeredUsers++;
+
+    updateDisplay("User Saved", name);
+
+    Serial.print("[SUCCESS] Registered: ");
+    Serial.println(name);
 
     delay(2000);
 
     showReadyScreen();
+
+    currentMode = ATTENDANCE_MODE;
 }
 
 void markAttendance(const String &uid)
@@ -355,4 +381,22 @@ User* findUserByUID(const String &uid)
 bool isAdminCard(const String &uid)
 {
     return uid == ADMIN_UID;
+}
+
+String readNameFromSerial()
+{
+    Serial.println();
+    Serial.println("=================================");
+    Serial.println("Enter User Name:");
+    Serial.println("=================================");
+
+    while (!Serial.available())
+    {
+        delay(10);
+    }
+
+    String name = Serial.readStringUntil('\n');
+    name.trim();
+
+    return name;
 }

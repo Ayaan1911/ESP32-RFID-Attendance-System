@@ -72,5 +72,18 @@ This document serves as the official bring-up and verification logbook for valid
   - Confirmed no regressions in duplicate-prevention, boot sequence, or OLED rendering.
 - **Status**: Multi-mode firmware architecture is operational. Prepared the project for the upcoming Dynamic User Registration phase.
 
+### Entry: 2026-07-16 - Dynamic User Registration (Milestone v0.9.0) [SUCCESS]
+- **Summary**: Implemented a full runtime user registration workflow. Scanning the admin card transitions the system into `REGISTRATION_MODE`. The next RFID scan captures the new card's UID, then `readNameFromSerial()` prompts the operator for a name via the Serial Monitor. The new user is dynamically inserted into the `users[]` array and immediately available for attendance marking — no firmware recompilation required.
+- **Results & Verification**:
+  - Successfully compiled the firmware and uploaded it to the physical ESP32 target hardware.
+  - **Registration flow**: Admin card scan → OLED shows `REGISTER USER` / `Scan New Card` → new card presented → Serial Monitor prompts `Enter User Name:` → name entered → OLED shows `User Saved` / `<Name>` → system returns to `ATTENDANCE_MODE`.
+  - **Serial output**: `[MODE] Registration Mode` on admin card; `[SUCCESS] Registered: <Name>` after name entry.
+  - **Immediate attendance**: Newly registered card was scanned immediately and successfully marked attendance, confirming the live database update works correctly.
+  - **Database full guard**: Confirmed `[ERROR] User database is full.` fires and gracefully returns to Attendance Mode when `registeredUsers >= MAX_USERS`.
+  - **Regression check**: Pre-loaded users, duplicate-attendance prevention, unknown card rejection, and boot sequence all continue to behave correctly.
+- **Known Limitation**: The current implementation allows re-registering the same RFID UID multiple times, creating duplicate entries. Duplicate registration prevention is scheduled for v0.10.
+- **Status**: Runtime user management is fully operational. Prepared the project for the upcoming Duplicate User Registration Prevention phase.
+
+
 
 

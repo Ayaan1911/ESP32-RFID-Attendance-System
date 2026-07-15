@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.9.0
+
+### Added
+
+- Runtime user registration
+- Registration mode workflow
+- User name input through Serial Monitor
+- Dynamic user creation
+- Runtime updates to in-memory user database
+
+### Notes
+
+- Duplicate registration prevention is scheduled for v0.10.
+
 ## v0.8.0
 
 ### Added
