@@ -40,7 +40,7 @@ enum SystemMode
 };
 
 SystemMode currentMode = ATTENDANCE_MODE;
-const String ADMIN_UID = "DB 1D 29 07";
+const String ADMIN_UID = "3D 87 D0 06";
 
 struct User
 {
@@ -78,10 +78,6 @@ void handleCard(const String& cardUID);
 void processCard(const String &uid);
 void registerCard(const String &uid);
 void markAttendance(const String &uid);
-
-// User Manager
-User* findUserByUID(const String &uid);
-bool isAdminCard(const String &uid);
 String readNameFromSerial();
 
 void setup() {
@@ -298,6 +294,25 @@ void registerCard(const String &uid)
 
         return;
     }
+
+    // Check if this RFID card is already registered
+    User *existingUser = findUserByUID(uid);
+
+    if (existingUser != nullptr)
+    {
+    updateDisplay("Already Registered", existingUser->name);
+
+    Serial.print("[ERROR] Card already belongs to: ");
+    Serial.println(existingUser->name);
+
+    delay(2000);
+
+    showReadyScreen();
+
+    currentMode = ATTENDANCE_MODE;
+
+    return;
+  }
 
     String name = readNameFromSerial();
 

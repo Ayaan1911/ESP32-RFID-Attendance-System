@@ -84,6 +84,18 @@ This document serves as the official bring-up and verification logbook for valid
 - **Known Limitation**: The current implementation allows re-registering the same RFID UID multiple times, creating duplicate entries. Duplicate registration prevention is scheduled for v0.10.
 - **Status**: Runtime user management is fully operational. Prepared the project for the upcoming Duplicate User Registration Prevention phase.
 
+### Entry: 2026-07-16 - Registration Validation & UID Uniqueness (Milestone v0.10.0) [SUCCESS]
+- **Summary**: Added a pre-registration uniqueness check inside `registerCard()`. Before accepting a new card, the firmware calls `findUserByUID()` against the existing database. If the UID is already assigned to a user, registration is rejected with an informative OLED message and Serial log entry. The `ADMIN_UID` was also updated to the correct physical card UID (`3D 87 D0 06`).
+- **Results & Verification**:
+  - Successfully compiled the firmware and uploaded it to the physical ESP32 target hardware.
+  - **New card registration**: Unregistered cards continue to register normally — OLED shows `User Saved` / `<Name>`, Serial prints `[SUCCESS] Registered: <Name>`.
+  - **Duplicate registration attempt**: Re-scanning an already-registered card during Registration Mode displays `Already Registered` / `<Name>` on the OLED and prints `[ERROR] Card already belongs to: <Name>` on Serial, then returns to Attendance Mode.
+  - **Admin card routing**: Updated `ADMIN_UID` (`3D 87 D0 06`) correctly triggers Registration Mode on the physical card.
+  - **Attendance mode**: All attendance flows (first scan, duplicate scan, unknown card) continue to work correctly with no regression.
+  - **Database integrity**: After multiple registration attempts including duplicates, the `users[]` array remains consistent with only unique entries.
+- **Status**: User database integrity is enforced at runtime. The in-memory registration system is complete. Prepared the project for the upcoming Persistent Storage (Preferences/NVS) phase.
+
+
 
 
 

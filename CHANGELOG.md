@@ -1,5 +1,19 @@
 # Changelog
 
+## v0.10.0
+
+### Added
+
+- Duplicate registration validation
+- UID uniqueness enforcement
+- Existing user verification
+
+### Improved
+
+- Registration workflow
+- User database integrity
+- Registration error handling
+
 ## v0.9.0
 
 ### Added

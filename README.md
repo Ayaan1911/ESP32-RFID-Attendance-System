@@ -42,8 +42,8 @@ Embedded systems design in academic and hobbyist settings often relies on copy-p
 - ✅ Duplicate Attendance Prevention
 - ✅ Admin Mode
 - ✅ Dynamic User Registration
-- ⬜ Duplicate User Registration Prevention
-- ⬜ Persistent Storage (EEPROM/Preferences)
+- ✅ Duplicate User Registration Prevention
+- ⬜ Persistent Storage (Preferences/NVS)
 - ⬜ Attendance Logs
 - ⬜ Wi-Fi Synchronization
 - ⬜ Backend API
@@ -83,7 +83,7 @@ This modular pipeline establishes that:
 4.  **Application Controller** dispatches to the correct operating mode based on system state and card identity.
 5.  **Attendance Mode** handles user authentication, duplicate prevention, and attendance marking.
 6.  **Registration Mode** accepts new RFID cards and captures user name input via Serial Monitor at runtime.
-7.  **User Manager** maintains the in-memory user database shared by both modes.
+7.  **User Manager** maintains the in-memory user database shared by both modes, and enforces UID uniqueness before inserting any new user.
 8.  **Future layers** will implement persistent storage and cloud synchronization.
 
 
