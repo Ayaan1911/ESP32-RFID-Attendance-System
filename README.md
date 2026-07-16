@@ -43,7 +43,8 @@ Embedded systems design in academic and hobbyist settings often relies on copy-p
 - ✅ Admin Mode
 - ✅ Dynamic User Registration
 - ✅ Duplicate User Registration Prevention
-- ⬜ Persistent Storage (Preferences/NVS)
+- ✅ Persistent User Storage
+- ⬜ Attendance Session Manager
 - ⬜ Attendance Logs
 - ⬜ Wi-Fi Synchronization
 - ⬜ Backend API
@@ -58,12 +59,10 @@ graph TD
     A[Hardware Layer] --> B[Initialization Layer]
     B --> C[RFID Service]
     C --> D[Application Controller]
-    D --> E[Attendance Mode]
-    D --> F[Registration Mode]
-    E --> G[User Manager]
-    F --> G
-    G --> H[Future Persistent Storage]
-    H --> I[Future Network Layer]
+    D --> E[User Manager]
+    E --> F[Persistent Storage Preferences/NVS]
+    F --> G[Future Attendance Log Manager]
+    G --> H[Future Network Layer]
 
     style A fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style B fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
@@ -71,20 +70,19 @@ graph TD
     style D fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style E fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
     style F fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style G fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
+    style G fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
     style H fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
-    style I fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
 ```
 
 This modular pipeline establishes that:
 1.  **Hardware Layer** represents the physical peripherals (ESP32, MFRC522, SSD1306).
-2.  **Initialization Layer** configures system interfaces (Serial, I2C, SPI) and displays booting screens.
+2.  **Initialization Layer** configures system interfaces (Serial, I2C, SPI, Preferences) and displays booting screens, loading saved users from NVS.
 3.  **RFID Service** encapsulates card detection, scanning, and raw UID extraction.
 4.  **Application Controller** dispatches to the correct operating mode based on system state and card identity.
-5.  **Attendance Mode** handles user authentication, duplicate prevention, and attendance marking.
-6.  **Registration Mode** accepts new RFID cards and captures user name input via Serial Monitor at runtime.
-7.  **User Manager** maintains the in-memory user database shared by both modes, and enforces UID uniqueness before inserting any new user.
-8.  **Future layers** will implement persistent storage and cloud synchronization.
+5.  **User Manager** maintains the user database, coordinates user retrieval/registration, and interfaces with storage.
+6.  **Persistent Storage (Preferences/NVS)** handles saving and loading the user database to ESP32 non-volatile flash memory.
+7.  **Future Attendance Log Manager** will handle caching attendance logs locally.
+8.  **Future Network Layer** will handle remote server/cloud synchronization.
 
 
 

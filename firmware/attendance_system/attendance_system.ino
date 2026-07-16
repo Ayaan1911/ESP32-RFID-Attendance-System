@@ -19,6 +19,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <Preferences.h>
 
 // OLED Display Configuration
 #define SCREEN_WIDTH 128
@@ -31,6 +32,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 #define RST_PIN         4
 #define SS_PIN          5
 MFRC522 mfrc522(SS_PIN, RST_PIN);
+Preferences preferences;
 
 enum SystemMode
 {
@@ -74,6 +76,11 @@ bool isCardPresent();
 String getCardUID();
 void handleCard(const String& cardUID);
 
+// Persistent Storage
+void initStorage();
+void saveUsers();
+void loadUsers();
+
 // Application Controller
 void processCard(const String &uid);
 void registerCard(const String &uid);
@@ -84,6 +91,8 @@ void setup() {
   // 1. Initialize Serial
   initSerial();
 
+  initStorage();
+  
   // 2. Initialize OLED Display
   initOLED();
 
@@ -323,6 +332,8 @@ void registerCard(const String &uid)
 
     registeredUsers++;
 
+    saveUsers();
+
     updateDisplay("User Saved", name);
 
     Serial.print("[SUCCESS] Registered: ");
@@ -414,4 +425,45 @@ String readNameFromSerial()
     name.trim();
 
     return name;
+}
+
+void initStorage()
+{
+    preferences.begin("attendance", false);
+
+    Serial.println("[OK] Preferences Storage Initialized");
+
+    loadUsers();
+}
+
+void saveUsers()
+{
+    preferences.putInt("userCount", registeredUsers);
+
+    for (int i = 0; i < registeredUsers; i++)
+    {
+        preferences.putString(("uid" + String(i)).c_str(), users[i].uid);
+        preferences.putString(("name" + String(i)).c_str(), users[i].name);
+        preferences.putBool(("attendance" + String(i)).c_str(), users[i].attendanceMarked);
+        preferences.putBool(("registered" + String(i)).c_str(), users[i].registered);
+    }
+
+    Serial.println("[OK] Users saved to flash.");
+}
+
+void loadUsers()
+{
+    registeredUsers = preferences.getInt("userCount", 2);
+
+    for (int i = 0; i < registeredUsers; i++)
+    {
+        users[i].uid = preferences.getString(("uid" + String(i)).c_str(), "");
+        users[i].name = preferences.getString(("name" + String(i)).c_str(), "");
+        users[i].attendanceMarked = preferences.getBool(("attendance" + String(i)).c_str(), false);
+        users[i].registered = preferences.getBool(("registered" + String(i)).c_str(), false);
+    }
+
+    Serial.print("[OK] Loaded ");
+    Serial.print(registeredUsers);
+    Serial.println(" users from flash.");
 }

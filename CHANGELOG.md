@@ -1,5 +1,25 @@
 # Changelog
 
+## v1.0.0
+
+### Added
+
+- ESP32 Preferences (NVS) integration
+- Persistent user database
+- Automatic user loading on boot
+- Automatic user saving after registration
+
+### Improved
+
+- Firmware persistence
+- Registration workflow
+- Boot initialization
+
+### Notes
+
+- User database now survives power cycles.
+- Attendance session state remains runtime-only.
+
 ## v0.10.0
 
 ### Added

@@ -95,6 +95,19 @@ This document serves as the official bring-up and verification logbook for valid
   - **Database integrity**: After multiple registration attempts including duplicates, the `users[]` array remains consistent with only unique entries.
 - **Status**: User database integrity is enforced at runtime. The in-memory registration system is complete. Prepared the project for the upcoming Persistent Storage (Preferences/NVS) phase.
 
+### Entry: 2026-07-16 - Persistent User Storage (Milestone v1.0.0) [SUCCESS]
+- **Summary**: Upgraded user database from a runtime-only array to a persistent system using the ESP32 Preferences (NVS) library. The database now loads registered users automatically on system boot and writes updates dynamically to non-volatile flash memory upon registration.
+- **Results & Verification**:
+  - Successfully compiled the firmware and uploaded it to the physical ESP32 target hardware.
+  - **Boot loading check**: Validated that `loadUsers()` executes successfully on system boot, initializing the NVS namespace and populating the database with any stored users.
+  - **Dynamic saving check**: Verified that registering a new user dynamically calls `saveUsers()`, which commits the updated database to the NVS storage namespace.
+  - **Power cycle verification**: Scanned the admin card, registered a new user, power-cycled (reset) the ESP32, and confirmed the new user is loaded and authenticated successfully on boot.
+  - **Attendance session state check**: Confirmed that `attendanceMarked` represents session state (reset to false on boot) and is intentionally not saved to Preferences, preserving the runtime-only session-based attendance model.
+  - **Persistence lifecycle**:
+    Register User ➔ Save User Database ➔ ESP32 Flash (NVS) ➔ Power Off ➔ Power On ➔ Load User Database ➔ System Ready.
+- **Status**: Milestone v1.0.0 successfully verified. The database survives power cycles, fulfilling the persistent storage requirements.
+
+
 
 
 
