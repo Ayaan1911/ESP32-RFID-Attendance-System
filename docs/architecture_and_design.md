@@ -53,6 +53,6 @@ The ESP32 RFID Attendance System is an IoT-enabled attendance logger. By checkin
 ---
 
 ## 9. Future Improvements
-- Migration from Arduino IDE to PlatformIO toolchains.
-- Dynamic credential provisioning over Bluetooth Low Energy (BLE).
-- Integration of hardware security modules (HSM) or hardware-encrypted storage (EEPROM) for high-integrity operations.
+- [x] Migration from Arduino IDE to PlatformIO toolchains (Completed in v1.1.0).
+- [ ] Dynamic credential provisioning over Bluetooth Low Energy (BLE).
+- [ ] Integration of hardware security modules (HSM) or hardware-encrypted storage (EEPROM) for high-integrity operations.

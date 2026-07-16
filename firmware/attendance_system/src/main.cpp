@@ -1,3 +1,11 @@
+#include <Arduino.h>
+#include <SPI.h>
+#include <MFRC522.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#include <Preferences.h>
+
 /**
  * @file attendance_system.ino
  * @brief ESP32 RFID Attendance System - RFID Service Refactoring (v0.4.0)
@@ -13,13 +21,6 @@
  * @author Ayaan
  * @date 2026-07-11
  */
-
-#include <SPI.h>
-#include <MFRC522.h>
-#include <Wire.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_SSD1306.h>
-#include <Preferences.h>
 
 // OLED Display Configuration
 #define SCREEN_WIDTH 128
@@ -50,6 +51,16 @@ struct User
     String name;
     bool attendanceMarked;
     bool registered;
+};
+
+struct AttendanceSession
+{
+    bool active;
+};
+
+AttendanceSession session =
+{
+    false
 };
 
 const int MAX_USERS = 10;
@@ -86,6 +97,8 @@ void processCard(const String &uid);
 void registerCard(const String &uid);
 void markAttendance(const String &uid);
 String readNameFromSerial();
+User* findUserByUID(const String &uid);
+bool isAdminCard(const String &uid);
 
 void setup() {
   // 1. Initialize Serial

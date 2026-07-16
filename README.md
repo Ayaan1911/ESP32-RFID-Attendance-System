@@ -2,7 +2,7 @@
 
 [![Platform: ESP32](https://img.shields.io/badge/Platform-ESP32-blue?style=for-the-badge&logo=espressif)](https://www.espressif.com/)
 [![Language: C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B)](https://isocpp.org/)
-[![IDE: Arduino](https://img.shields.io/badge/IDE-Arduino-00979D?style=for-the-badge&logo=arduino)](https://www.arduino.cc/)
+[![Platform: PlatformIO](https://img.shields.io/badge/Platform-PlatformIO-orange?style=for-the-badge&logo=platformio)](https://platformio.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 [![Status: Firmware Development](https://img.shields.io/badge/Status-Firmware_Development-blue?style=for-the-badge)](docs/development/hardware_validation_log.md)
 
@@ -97,11 +97,30 @@ This modular pipeline establishes that:
 - **Access Credentials**: Mifare Classic 1K RFID cards & key fobs
 
 ### Software Stack
-- **IDE**: Arduino IDE (bringing up hardware), migrating to **VS Code & PlatformIO** in Phase 2.
+- **IDE / Build System**: VS Code & PlatformIO
+- **Framework**: Arduino ESP32 Framework
 - **Core Library Dependencies**:
   - `Adafruit SSD1306` (Display output driver)
   - `Adafruit GFX Library` (Display text rendering engine)
   - `MFRC522` (SPI RFID controller library)
+
+---
+
+## 💻 Development Environment
+
+Development is now performed using PlatformIO with Visual Studio Code.
+
+Platform:
+
+- PlatformIO
+- ESP32 Dev Module
+- Arduino Framework
+
+Required libraries:
+
+- MFRC522
+- Adafruit SSD1306
+- Adafruit GFX Library
 
 ---
 
@@ -113,8 +132,8 @@ The system utilizes an event-driven loop that separates driver execution from hi
 +---------------------------------------------------------+
 |                  Application Loop                       |
 +---------------------------------------------------------+
-                          |
-                          v
+                           |
+                           v
 +---------------------------------------------------------+
 |                Finite State Machine                     |
 |  (BOOTING -> IDLE -> SCANNING -> VALIDATING -> ALERTS)  |
@@ -133,13 +152,17 @@ The system utilizes an event-driven loop that separates driver execution from hi
 
 ```text
 ESP32-RFID-Attendance-System/
-├── .gitignore                    # Arduino, PlatformIO, VS Code, OS temp files
+├── .gitignore                    # Git ignore file for PlatformIO, VS Code, OS temp files
 ├── LICENSE                       # MIT License file
 ├── README.md                     # Main repository documentation entry
 ├── CHANGELOG.md                  # Project versioning and history tracking
 ├── firmware/                     # Embedded C/C++ firmware
-│   └── attendance_system/
-│       └── attendance_system.ino # Main Arduino sketch
+│   └── attendance_system/        # PlatformIO project directory
+│       ├── platformio.ini        # PlatformIO configuration file
+│       ├── include/              # Header files
+│       ├── src/
+│       │   └── main.cpp          # Main firmware source code
+│       └── test/                 # Unit tests
 ├── hardware/                     # Wiring maps and layout schematics
 │   └── wiring.md
 └── docs/                         # Extended specifications and architectural plans

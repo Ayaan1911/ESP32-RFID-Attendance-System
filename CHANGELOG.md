@@ -1,5 +1,26 @@
 # Changelog
 
+## v1.1.0
+
+### Added
+
+- PlatformIO project support
+- src/main.cpp firmware entry point
+- PlatformIO dependency management
+- PlatformIO build system
+
+### Improved
+
+- Development workflow
+- Build reproducibility
+- Library management
+- Firmware maintainability
+
+### Notes
+
+- Firmware behavior remains identical to the Arduino IDE version.
+- Migration completed without functional changes.
+
 ## v1.0.0
 
 ### Added
