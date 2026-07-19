@@ -3,6 +3,7 @@
 #include "attendance_manager.h"
 #include "display_manager.h"
 #include "rfid_service.h"
+#include "wifi_manager.h"
 #include "storage_manager.h"
 #include "user_manager.h"
 
@@ -44,6 +45,8 @@ void appSetup()
     delay(2000);
 
     initRFID();
+
+    initWiFi();
 
     showReadyScreen();
 }
