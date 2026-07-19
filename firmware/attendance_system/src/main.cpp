@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <MFRC522.h>
-#include <Preferences.h>
 
 #include "display_manager.h"
+#include "storage_manager.h"
 
 /**
  * @file attendance_system.ino
@@ -25,7 +25,6 @@
 #define RST_PIN         4
 #define SS_PIN          5
 MFRC522 mfrc522(SS_PIN, RST_PIN);
-Preferences preferences;
 
 enum SystemMode
 {
@@ -36,14 +35,6 @@ enum SystemMode
 
 SystemMode currentMode = ATTENDANCE_MODE;
 const String ADMIN_UID = "3D 87 D0 06";
-
-struct User
-{
-    String uid;
-    String name;
-    bool attendanceMarked;
-    bool registered;
-};
 
 struct AttendanceSession
 {
@@ -76,10 +67,6 @@ String getCardUID();
 void handleCard(const String& cardUID);
 
 // Persistent Storage
-void initStorage();
-void saveUsers();
-void loadUsers();
-
 // Application Controller
 void processCard(const String &uid);
 void registerCard(const String &uid);
@@ -92,7 +79,7 @@ void setup() {
   // 1. Initialize Serial
   initSerial();
 
-  initStorage();
+  initStorage(users, registeredUsers);
   
   // 2. Initialize OLED Display
   initOLED();
@@ -201,14 +188,17 @@ void initRFID() {
 
 void processCard(const String &uid)
 {
-    // Admin card scanned while in Attendance Mode
-    if (currentMode == ATTENDANCE_MODE && isAdminCard(uid))
+    // Admin card must never fall through to normal user lookup/registration.
+    if (isAdminCard(uid))
     {
-        currentMode = REGISTRATION_MODE;
+        if (currentMode == ATTENDANCE_MODE)
+        {
+            currentMode = REGISTRATION_MODE;
 
-        updateDisplay("REGISTER USER", "", "Scan New Card");
+            updateDisplay("REGISTER USER", "", "Scan New Card");
 
-        Serial.println("[MODE] Registration Mode");
+            Serial.println("[MODE] Registration Mode");
+        }
 
         return;
     }
@@ -268,7 +258,7 @@ void registerCard(const String &uid)
 
     registeredUsers++;
 
-    saveUsers();
+    saveUsers(users, registeredUsers);
 
     updateDisplay("User Saved", name);
 
@@ -361,45 +351,4 @@ String readNameFromSerial()
     name.trim();
 
     return name;
-}
-
-void initStorage()
-{
-    preferences.begin("attendance", false);
-
-    Serial.println("[OK] Preferences Storage Initialized");
-
-    loadUsers();
-}
-
-void saveUsers()
-{
-    preferences.putInt("userCount", registeredUsers);
-
-    for (int i = 0; i < registeredUsers; i++)
-    {
-        preferences.putString(("uid" + String(i)).c_str(), users[i].uid);
-        preferences.putString(("name" + String(i)).c_str(), users[i].name);
-        preferences.putBool(("attendance" + String(i)).c_str(), users[i].attendanceMarked);
-        preferences.putBool(("registered" + String(i)).c_str(), users[i].registered);
-    }
-
-    Serial.println("[OK] Users saved to flash.");
-}
-
-void loadUsers()
-{
-    registeredUsers = preferences.getInt("userCount", 2);
-
-    for (int i = 0; i < registeredUsers; i++)
-    {
-        users[i].uid = preferences.getString(("uid" + String(i)).c_str(), "");
-        users[i].name = preferences.getString(("name" + String(i)).c_str(), "");
-        users[i].attendanceMarked = preferences.getBool(("attendance" + String(i)).c_str(), false);
-        users[i].registered = preferences.getBool(("registered" + String(i)).c_str(), false);
-    }
-
-    Serial.print("[OK] Loaded ");
-    Serial.print(registeredUsers);
-    Serial.println(" users from flash.");
 }
