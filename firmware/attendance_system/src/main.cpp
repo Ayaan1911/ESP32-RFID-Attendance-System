@@ -1,8 +1,7 @@
 #include <Arduino.h>
-#include <SPI.h>
-#include <MFRC522.h>
 
 #include "display_manager.h"
+#include "rfid_service.h"
 #include "storage_manager.h"
 
 /**
@@ -20,11 +19,6 @@
  * @author Ayaan
  * @date 2026-07-11
  */
-
-// MFRC522 Configuration
-#define RST_PIN         4
-#define SS_PIN          5
-MFRC522 mfrc522(SS_PIN, RST_PIN);
 
 enum SystemMode
 {
@@ -58,13 +52,6 @@ int registeredUsers = 2;
 
 // Function Prototypes - System Boot
 void initSerial();
-void initRFID();
-
-// Function Prototypes - RFID Service
-void processRFID();
-bool isCardPresent();
-String getCardUID();
-void handleCard(const String& cardUID);
 
 // Persistent Storage
 // Application Controller
@@ -101,63 +88,6 @@ void loop() {
 }
 
 /**
- * Controls the RFID processing workflow.
- */
-void processRFID() {
-  if (isCardPresent()) {
-    String cardUID = getCardUID();
-    if (cardUID.length() > 0) {
-      handleCard(cardUID);
-    }
-  }
-}
-
-/**
- * Detects whether a new RFID card has been scanned.
- * @return True if a card is present and read successfully, false otherwise.
- */
-bool isCardPresent() {
-  // Check if a new card is physically present on the reader
-  if (!mfrc522.PICC_IsNewCardPresent()) {
-    return false;
-  }
-  // Read the card serial number details
-  if (!mfrc522.PICC_ReadCardSerial()) {
-    return false;
-  }
-  return true;
-}
-
-/**
- * Extracts and formats the UID from the scanned card.
- * @return Formatted space-separated uppercase hex String.
- */
-String getCardUID() {
-  String uidStr = "";
-  for (byte i = 0; i < mfrc522.uid.size; i++) {
-    if (mfrc522.uid.uidByte[i] < 0x10) {
-      uidStr += "0";
-    }
-    uidStr += String(mfrc522.uid.uidByte[i], HEX);
-    if (i < mfrc522.uid.size - 1) {
-      uidStr += " ";
-    }
-  }
-  uidStr.toUpperCase();
-  return uidStr;
-}
-
-/**
- * Handles presentation and callback operations for a validated card UID.
- * Prints logs to Serial, updates OLED output, and halts card communications.
- * @param cardUID The formatted card UID string to handle.
- */
-void handleCard(const String &uid)
-{
-    processCard(uid);
-}
-
-/**
  * Initializes the Serial interface and prints the boot sequence header.
  */
 void initSerial() {
@@ -169,22 +99,6 @@ void initSerial() {
   Serial.println("========================================");
 }
 
-/**
- * Initializes the MFRC522 reader via SPI.
- */
-void initRFID() {
-  SPI.begin();
-  mfrc522.PCD_Init();
-  
-  // Verify physical communication with the chip
-  byte version = mfrc522.PCD_ReadRegister(mfrc522.VersionReg);
-  if (version == 0x00 || version == 0xFF) {
-    Serial.println("[ERROR] MFRC522 RFID Reader Not Found. Halt.");
-    updateDisplay("System Error", "RFID Reader", "Initialization Failed");
-    while (true); // Halt loop
-  }
-  Serial.println("[OK] RFID Reader Initialized");
-}
 
 void processCard(const String &uid)
 {
