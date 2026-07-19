@@ -2,6 +2,7 @@
 
 #include "display_manager.h"
 #include "rfid_service.h"
+#include "user_manager.h"
 #include "storage_manager.h"
 
 /**
@@ -56,10 +57,7 @@ void initSerial();
 // Persistent Storage
 // Application Controller
 void processCard(const String &uid);
-void registerCard(const String &uid);
 void markAttendance(const String &uid);
-String readNameFromSerial();
-User* findUserByUID(const String &uid);
 bool isAdminCard(const String &uid);
 
 void setup() {
@@ -119,71 +117,14 @@ void processCard(const String &uid)
 
     if (currentMode == REGISTRATION_MODE)
     {
-        registerCard(uid);
+        registerCard(users, registeredUsers, MAX_USERS, uid);
+
+        currentMode = ATTENDANCE_MODE;
     }
     else
     {
         markAttendance(uid);
     }
-}
-
-void registerCard(const String &uid)
-{
-    if (registeredUsers >= MAX_USERS)
-    {
-        updateDisplay("Database Full", "Full", "");
-
-        Serial.println("[ERROR] User database is full.");
-
-        delay(2000);
-
-        showReadyScreen();
-
-        currentMode = ATTENDANCE_MODE;
-
-        return;
-    }
-
-    // Check if this RFID card is already registered
-    User *existingUser = findUserByUID(uid);
-
-    if (existingUser != nullptr)
-    {
-    updateDisplay("Already Registered", existingUser->name);
-
-    Serial.print("[ERROR] Card already belongs to: ");
-    Serial.println(existingUser->name);
-
-    delay(2000);
-
-    showReadyScreen();
-
-    currentMode = ATTENDANCE_MODE;
-
-    return;
-  }
-
-    String name = readNameFromSerial();
-
-    users[registeredUsers].uid = uid;
-    users[registeredUsers].name = name;
-    users[registeredUsers].attendanceMarked = false;
-    users[registeredUsers].registered = true;
-
-    registeredUsers++;
-
-    saveUsers(users, registeredUsers);
-
-    updateDisplay("User Saved", name);
-
-    Serial.print("[SUCCESS] Registered: ");
-    Serial.println(name);
-
-    delay(2000);
-
-    showReadyScreen();
-
-    currentMode = ATTENDANCE_MODE;
 }
 
 void markAttendance(const String &uid)
@@ -202,7 +143,7 @@ void markAttendance(const String &uid)
     return;
     }
 
-    User *user = findUserByUID(uid);
+    User *user = findUserByUID(users, registeredUsers, uid);
 
     if (user->attendanceMarked){
 
@@ -231,38 +172,7 @@ void markAttendance(const String &uid)
     showReadyScreen();
 }
 
-User* findUserByUID(const String &uid)
-{
-    for (int i = 0; i < registeredUsers; i++)
-    {
-        if (users[i].uid == uid)
-        {
-            return &users[i];
-        }
-    }
-
-    return nullptr;
-}
-
 bool isAdminCard(const String &uid)
 {
     return uid == ADMIN_UID;
-}
-
-String readNameFromSerial()
-{
-    Serial.println();
-    Serial.println("=================================");
-    Serial.println("Enter User Name:");
-    Serial.println("=================================");
-
-    while (!Serial.available())
-    {
-        delay(10);
-    }
-
-    String name = Serial.readStringUntil('\n');
-    name.trim();
-
-    return name;
 }

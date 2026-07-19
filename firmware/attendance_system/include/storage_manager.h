@@ -3,13 +3,7 @@
 
 #include <Arduino.h>
 
-struct User
-{
-    String uid;
-    String name;
-    bool attendanceMarked;
-    bool registered;
-};
+#include "user_manager.h"
 
 void initStorage(User *users, int &registeredUsers);
 void saveUsers(const User *users, int registeredUsers);
