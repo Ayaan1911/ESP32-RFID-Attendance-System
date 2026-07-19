@@ -1,8 +1,7 @@
 #include "rfid_service.h"
 
+#include "application_controller.h"
 #include "display_manager.h"
-
-void processCard(const String &uid);
 
 // MFRC522 Configuration
 #define RST_PIN         4
