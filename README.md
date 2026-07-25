@@ -6,111 +6,114 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 [![Status: Firmware Development](https://img.shields.io/badge/Status-Firmware_Development-blue?style=for-the-badge)](docs/development/hardware_validation_log.md)
 
-A professional, modular RFID-based attendance logging system developed on the ESP32 platform. This project is built incrementally, prioritizing clean software engineering principles, clear hardware decoupling, documentation-first validation, and a clear path toward full network synchronization and dashboard analytics.
+A professional, modular RFID-based attendance logging system developed on the ESP32 platform. This project is built incrementally, prioritizing clean software engineering principles, clear hardware decoupling, documentation-first validation, and a clear path toward backend synchronization and dashboard analytics.
 
 ---
 
-## 📖 Project Overview
+## Project Overview
 
-The ESP32 RFID Attendance System aims to deliver a resume-quality, robust IoT system. The initial hardware setup features an ESP32 microcontroller, an SPI-based MFRC522 RFID reader, and an I2C-based SSD1306 OLED display. Starting from hardware bring-up and physical verification, this repository will evolve to encompass local caching, encrypted credentials database storage, Wi-Fi networking, a REST API client, and a remote management dashboard.
+The ESP32 RFID Attendance System aims to deliver a resume-quality, robust IoT system. The initial hardware setup features an ESP32 microcontroller, an SPI-based MFRC522 RFID reader, and an I2C-based SSD1306 OLED display. The repository now contains both `firmware/` for the embedded PlatformIO project and `backend/` for the FastAPI attendance service used during local-network testing. Current firmware work spans local storage, Wi-Fi connectivity, and an additive REST API client that syncs attendance events without changing the local marking flow.
 
-### ✨ Key Features (Firmware)
-- **Registered User Authentication**: Validates scanned card UIDs against an internal user database.
-- **Unknown Card Rejection**: Instantly rejects unregistered cards to prevent unauthorized logging.
-- **OLED User Feedback**: Displays personalized greeting messages and attendance status.
+### Key Features
+- Registered user authentication against an internal user database.
+- Unknown card rejection to prevent unauthorized logging.
+- OLED user feedback with personalized greeting and attendance status.
+- Local-only REST synchronization when Wi-Fi and the backend are available.
 
 ---
 
-## 💡 Motivation
+## Motivation
 
 Embedded systems design in academic and hobbyist settings often relies on copy-paste code and monolithic, unmaintainable Arduino sketches. This project treats the ESP32 platform like a professional IoT node:
-- **Clean separation of concerns** between drivers, logic, and networking.
-- **Strict state management** using Finite State Machines.
-- **Traceability** via hardware logs and changelogs.
-- **Scalability** to support enterprise dashboard management in later phases.
+- Clean separation of concerns between drivers, logic, and networking.
+- Strict state management using finite state machines.
+- Traceability via hardware logs and changelogs.
+- Scalability toward a future dashboard-backed workflow.
 
 ---
 
-## 📈 Development Roadmap
+## Development Roadmap
 
-- ✅ Repository Scaffold
-- ✅ Hardware Validation
-- ✅ System Boot Sequence
-- ✅ RFID Service
-- ✅ Application Controller
-- ✅ User Management
-- ✅ Duplicate Attendance Prevention
-- ✅ Admin Mode
-- ✅ Dynamic User Registration
-- ✅ Duplicate User Registration Prevention
-- ✅ Persistent User Storage
-- ⬜ Attendance Session Manager
-- ⬜ Attendance Logs
-- ⬜ Wi-Fi Synchronization
-- ⬜ Backend API
-- ⬜ Web Dashboard
+- [x] Repository Scaffold
+- [x] Hardware Validation
+- [x] System Boot Sequence
+- [x] RFID Service
+- [x] Application Controller
+- [x] User Management
+- [x] Duplicate Attendance Prevention
+- [x] Admin Mode
+- [x] Dynamic User Registration
+- [x] Duplicate User Registration Prevention
+- [x] Persistent User Storage
+- [x] Attendance Session Manager
+- [x] Wi-Fi Synchronization
+- [x] Backend API (Bootstrap)
+- [x] REST API Client
+- [ ] Attendance Logs
+- [ ] Web Dashboard
 
 ---
 
-## 🏛️ Current Firmware Architecture
+## Current Architecture
 
 ```mermaid
 graph TD
-    A[Hardware Layer] --> B[Initialization Layer]
-    B --> C[RFID Service]
-    C --> D[Application Controller]
-    D --> E[User Manager]
-    E --> F[Persistent Storage Preferences/NVS]
-    F --> G[Future Attendance Log Manager]
-    G --> H[Future Network Layer]
+    FW[Firmware / PlatformIO] --> AC[application_controller]
+    AC --> RFID[rfid_service]
+    AC --> AM[attendance_manager]
+    AC --> UM[user_manager]
+    AC --> SM[storage_manager]
+    AC --> DM[display_manager]
+    AC --> WM[wifi_manager]
+    AM --> RC[rest_client]
+    RC --> BE[backend/ FastAPI service]
 
-    style A fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style B fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style C fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style D fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style E fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style F fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style G fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
-    style H fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
+    style FW fill:#4C6FFF,stroke:#2F4FD4,stroke-width:2px,color:#fff
+    style AC fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
+    style RFID fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
+    style AM fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
+    style UM fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
+    style SM fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
+    style DM fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
+    style WM fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
+    style RC fill:#FF9800,stroke:#EF6C00,stroke-width:2px,color:#fff
+    style BE fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
 ```
 
 This modular pipeline establishes that:
-1.  **Hardware Layer** represents the physical peripherals (ESP32, MFRC522, SSD1306).
-2.  **Initialization Layer** configures system interfaces (Serial, I2C, SPI, Preferences) and displays booting screens, loading saved users from NVS.
-3.  **RFID Service** encapsulates card detection, scanning, and raw UID extraction.
-4.  **Application Controller** dispatches to the correct operating mode based on system state and card identity.
-5.  **User Manager** maintains the user database, coordinates user retrieval/registration, and interfaces with storage.
-6.  **Persistent Storage (Preferences/NVS)** handles saving and loading the user database to ESP32 non-volatile flash memory.
-7.  **Future Attendance Log Manager** will handle caching attendance logs locally.
-8.  **Future Network Layer** will handle remote server/cloud synchronization.
-
-
+1. `application_controller` coordinates boot and scan-time state transitions.
+2. `rfid_service` handles card detection and UID extraction.
+3. `attendance_manager` owns local attendance marking and the additive REST sync call.
+4. `user_manager` handles lookup and registration of users.
+5. `storage_manager` persists user records in ESP32 non-volatile storage.
+6. `display_manager` renders the user-facing OLED messages.
+7. `wifi_manager` manages connection state and exposes `isWiFiConnected()`.
+8. `rest_client` POSTs attendance events to the FastAPI backend when Wi-Fi is available.
+9. `backend/` is a sibling FastAPI component used for local-network attendance testing and future expansion.
 
 ---
 
-## 🛠️ System Specifications
+## System Specifications
 
 ### Hardware Inventory
-- **Microcontroller**: ESP32 Dev Module (WROOM-32 Core)
-- **RFID Reader**: MFRC522 (13.56 MHz RFID Transceiver)
-- **Display**: SSD1306 OLED (0.96" 128x64 display, I2C interface)
-- **Access Credentials**: Mifare Classic 1K RFID cards & key fobs
+- Microcontroller: ESP32 Dev Module (WROOM-32 Core)
+- RFID Reader: MFRC522 (13.56 MHz RFID transceiver)
+- Display: SSD1306 OLED (0.96" 128x64 display, I2C interface)
+- Access Credentials: Mifare Classic 1K RFID cards and key fobs
 
 ### Software Stack
-- **IDE / Build System**: VS Code & PlatformIO
-- **Framework**: Arduino ESP32 Framework
-- **Core Library Dependencies**:
-  - `Adafruit SSD1306` (Display output driver)
-  - `Adafruit GFX Library` (Display text rendering engine)
-  - `MFRC522` (SPI RFID controller library)
+- IDE / Build System: VS Code and PlatformIO
+- Framework: Arduino ESP32 Framework
+- Core Library Dependencies:
+  - `Adafruit SSD1306`
+  - `Adafruit GFX Library`
+  - `MFRC522`
 
 ---
 
-## 💻 Development Environment
+## Development Environment
 
 Development is now performed using PlatformIO with Visual Studio Code.
-
-Platform:
 
 - PlatformIO
 - ESP32 Dev Module
@@ -124,9 +127,9 @@ Required libraries:
 
 ---
 
-## 🏛️ High-Level Architecture
+## High-Level Architecture
 
-The system utilizes an event-driven loop that separates driver execution from high-level state decisions. Detail specifications are documented in the [System Architecture and Design](file:///d:/Projects/ESP32-RFID-Attendance-System/docs/architecture_and_design.md).
+The system uses an event-driven loop that separates driver execution from high-level state decisions. Detail specifications are documented in [docs/architecture_and_design.md](docs/architecture_and_design.md).
 
 ```text
 +---------------------------------------------------------+
@@ -148,46 +151,70 @@ The system utilizes an event-driven loop that separates driver execution from hi
 
 ---
 
-## 📂 Directory Layout
+## Directory Layout
 
 ```text
 ESP32-RFID-Attendance-System/
-├── .gitignore                    # Git ignore file for PlatformIO, VS Code, OS temp files
-├── LICENSE                       # MIT License file
-├── README.md                     # Main repository documentation entry
-├── CHANGELOG.md                  # Project versioning and history tracking
-├── firmware/                     # Embedded C/C++ firmware
-│   └── attendance_system/        # PlatformIO project directory
-│       ├── platformio.ini        # PlatformIO configuration file
-│       ├── include/              # Header files
-│       ├── src/
-│       │   └── main.cpp          # Main firmware source code
-│       └── test/                 # Unit tests
-├── hardware/                     # Wiring maps and layout schematics
+├── .gitignore
+├── LICENSE
+├── README.md
+├── CHANGELOG.md
+├── backend/
+│   ├── README.md
+│   ├── requirements.txt
+│   └── app/
+│       ├── __init__.py
+│       ├── main.py
+│       └── models.py
+├── firmware/
+│   └── attendance_system/
+│       ├── platformio.ini
+│       ├── include/
+│       │   ├── application_controller.h
+│       │   ├── attendance_manager.h
+│       │   ├── backend_config.h
+│       │   ├── display_manager.h
+│       │   ├── rest_client.h
+│       │   ├── rfid_service.h
+│       │   ├── storage_manager.h
+│       │   ├── user_manager.h
+│       │   ├── wifi_credentials.h.example
+│       │   └── wifi_manager.h
+│       └── src/
+│           ├── application_controller.cpp
+│           ├── attendance_manager.cpp
+│           ├── display_manager.cpp
+│           ├── main.cpp
+│           ├── rest_client.cpp
+│           ├── rfid_service.cpp
+│           ├── storage_manager.cpp
+│           ├── user_manager.cpp
+│           └── wifi_manager.cpp
+├── hardware/
 │   └── wiring.md
-└── docs/                         # Extended specifications and architectural plans
+└── docs/
     ├── architecture_and_design.md
     ├── development/
-    │   └── hardware_validation_log.md # Log book detailing active bring-up phase
-    └── images/                   # Block diagrams and schematics assets
+    │   └── hardware_validation_log.md
+    └── security_considerations.md
 ```
 
 ---
 
-## ⚙️ Development Philosophy
+## Development Philosophy
 
-- **Modular Design**: Driver specific functions are encapsulated rather than scattered through raw loops.
-- **Defensive Programming**: Validate serial bounds, memory buffers, and connection integrity explicitly.
-- **Explicit Pin Mapping**: Always map pins inside a unified file ([wiring.md](file:///d:/Projects/ESP32-RFID-Attendance-System/hardware/wiring.md)) to avoid hardcoding pins in code.
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Since this repository is a structured engineering portfolio, please open an Issue to discuss hardware mapping changes, alternative FSM implementations, or custom PCB layout reviews before submitting Pull Requests.
+- Modular design: driver-specific functions are encapsulated rather than scattered through raw loops.
+- Defensive programming: validate serial bounds, memory buffers, and connection integrity explicitly.
+- Explicit pin mapping: always map pins inside a unified file to avoid hardcoding pins in code.
 
 ---
 
-## 📜 License
+## Contributing
+
+Contributions are welcome. Since this repository is a structured engineering portfolio, please open an Issue to discuss hardware mapping changes, alternative FSM implementations, or custom PCB layout reviews before submitting Pull Requests.
+
+---
+
+## License
 
 This project is licensed under the [MIT License](LICENSE).

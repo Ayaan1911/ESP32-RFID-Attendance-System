@@ -1,6 +1,7 @@
 #include "attendance_manager.h"
 
 #include "display_manager.h"
+#include "rest_client.h"
 
 void markAttendance(User *users, int registeredUsers, const String &uid)
 {
@@ -41,6 +42,8 @@ void markAttendance(User *users, int registeredUsers, const String &uid)
 
     Serial.print("[SUCCESS] Attendance Marked: ");
     Serial.println(user->name);
+
+    sendAttendanceEvent(user->uid, user->name);
 
     delay(2000);
 
