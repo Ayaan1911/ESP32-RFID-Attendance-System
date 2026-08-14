@@ -3,9 +3,10 @@
 #include "attendance_manager.h"
 #include "display_manager.h"
 #include "rfid_service.h"
-#include "wifi_manager.h"
 #include "storage_manager.h"
+#include "sync_queue.h"
 #include "user_manager.h"
+#include "wifi_manager.h"
 
 SystemMode currentMode = ATTENDANCE_MODE;
 static const String ADMIN_UID = "3D 87 D0 06";
@@ -54,6 +55,22 @@ void appSetup()
 void appLoop()
 {
     processRFID();
+
+    static unsigned long lastQueueFlushMs = 0;
+    const unsigned long queueFlushIntervalMs = 12000UL;
+    unsigned long now = millis();
+
+    if (lastQueueFlushMs == 0)
+    {
+        lastQueueFlushMs = now;
+        return;
+    }
+
+    if (now - lastQueueFlushMs >= queueFlushIntervalMs)
+    {
+        lastQueueFlushMs = now;
+        attemptQueueFlush();
+    }
 }
 
 void processCard(const String &uid)

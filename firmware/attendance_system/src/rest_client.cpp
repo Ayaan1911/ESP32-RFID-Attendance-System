@@ -3,6 +3,7 @@
 #include <HTTPClient.h>
 
 #include "backend_config.h"
+#include "sync_queue.h"
 #include "wifi_manager.h"
 
 namespace
@@ -56,14 +57,8 @@ String escapeJson(const String &value)
 }
 } // namespace
 
-void sendAttendanceEvent(const String &uid, const String &name)
+bool postAttendanceEvent(const String &uid, const String &name)
 {
-    if (!isWiFiConnected())
-    {
-        Serial.println("[REST] Skipping attendance sync: WiFi offline.");
-        return;
-    }
-
     WiFiClient client;
     HTTPClient http;
     String url = "http://" + String(BACKEND_HOST) + ":" + String(BACKEND_PORT) + "/attendance";
@@ -72,15 +67,16 @@ void sendAttendanceEvent(const String &uid, const String &name)
     if (!http.begin(client, url))
     {
         Serial.println("[REST] Failed to initialize HTTP client.");
-        return;
+        return false;
     }
 
     http.setTimeout(4000);
     http.addHeader("Content-Type", "application/json");
 
     int statusCode = http.POST(payload);
+    bool success = (statusCode >= 200 && statusCode < 300);
 
-    if (statusCode > 0)
+    if (success)
     {
         Serial.print("[REST] Attendance sync response: ");
         Serial.println(statusCode);
@@ -92,4 +88,23 @@ void sendAttendanceEvent(const String &uid, const String &name)
     }
 
     http.end();
+
+    return success;
+}
+
+void sendAttendanceEvent(const String &uid, const String &name)
+{
+    if (!isWiFiConnected())
+    {
+        Serial.println("[REST] WiFi offline; queueing attendance sync.");
+        enqueueAttendanceEvent(uid, name);
+        return;
+    }
+
+    if (postAttendanceEvent(uid, name))
+    {
+        return;
+    }
+
+    enqueueAttendanceEvent(uid, name);
 }
