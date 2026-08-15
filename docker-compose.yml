@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: esp32-attendance-postgres
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - attendance_pgdata:/var/lib/postgresql/data
+
+volumes:
+  attendance_pgdata:
+    name: attendance_pgdata

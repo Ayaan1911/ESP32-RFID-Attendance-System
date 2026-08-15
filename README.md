@@ -1,4 +1,4 @@
-# ESP32 RFID Attendance System
+﻿# ESP32 RFID Attendance System
 
 [![Platform: ESP32](https://img.shields.io/badge/Platform-ESP32-blue?style=for-the-badge&logo=espressif)](https://www.espressif.com/)
 [![Language: C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B)](https://isocpp.org/)
@@ -20,6 +20,7 @@ The ESP32 RFID Attendance System aims to deliver a resume-quality, robust IoT sy
 - OLED user feedback with personalized greeting and attendance status.
 - Local-only REST synchronization when Wi-Fi and the backend are available.
 - Attendance sync endpoints are protected by a shared `X-API-Key` between the firmware and backend.
+- Attendance history is now persisted in PostgreSQL on the backend.
 
 ---
 
@@ -232,3 +233,4 @@ Contributions are welcome. Since this repository is a structured engineering por
 ## License
 
 This project is licensed under the [MIT License](LICENSE).
+

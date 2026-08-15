@@ -3,6 +3,6 @@
 
 #define BACKEND_HOST "your_backend_host_here"
 #define BACKEND_PORT 8000
-#define BACKEND_API_KEY "your_shared_secret_key_here"
+#define BACKEND_API_KEY "c5c9684647394405b351babc858ae757da249bfd8d754c16ab10351ae49f0d16"
 
 #endif

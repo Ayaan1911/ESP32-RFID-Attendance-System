@@ -19,6 +19,35 @@ copy .env.example .env
 ```
 
 Edit `.env` and replace `API_KEY=your_shared_secret_key_here` with a real secret.
+Set the PostgreSQL connection values in the same file so the backend and the
+database container share the same credentials:
+
+```bash
+POSTGRES_USER=attendance_app
+POSTGRES_PASSWORD=change_me
+POSTGRES_DB=attendance_db
+DATABASE_URL=postgresql://attendance_app:change_me@localhost:5432/attendance_db
+```
+
+You can keep the sample values while testing locally, but use a dedicated,
+least-privileged database role instead of the Postgres superuser.
+
+## PostgreSQL
+
+Start the local database container from the repository root:
+
+```bash
+docker compose up -d
+```
+
+Verify the container is running with:
+
+```bash
+docker ps
+```
+
+The backend auto-creates the attendance table on startup, so no manual migration
+step is needed for this milestone.
 
 ## Run
 
