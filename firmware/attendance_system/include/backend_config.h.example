@@ -1,0 +1,8 @@
+#ifndef BACKEND_CONFIG_H_EXAMPLE
+#define BACKEND_CONFIG_H_EXAMPLE
+
+#define BACKEND_HOST "your_backend_host_here"
+#define BACKEND_PORT 8000
+#define BACKEND_API_KEY "your_shared_secret_key_here"
+
+#endif

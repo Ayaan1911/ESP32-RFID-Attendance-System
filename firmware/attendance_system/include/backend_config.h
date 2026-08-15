@@ -1,7 +1,0 @@
-#ifndef BACKEND_CONFIG_H
-#define BACKEND_CONFIG_H
-
-#define BACKEND_HOST "192.168.29.174"
-#define BACKEND_PORT 8000
-
-#endif
