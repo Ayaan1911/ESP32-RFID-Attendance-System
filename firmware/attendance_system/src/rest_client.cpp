@@ -72,6 +72,7 @@ bool postAttendanceEvent(const String &uid, const String &name)
 
     http.setTimeout(4000);
     http.addHeader("Content-Type", "application/json");
+    http.addHeader("X-API-Key", BACKEND_API_KEY);
 
     int statusCode = http.POST(payload);
     bool success = (statusCode >= 200 && statusCode < 300);

@@ -35,5 +35,8 @@ desktop.ini
 *.bak
 *.tmp
 *.log
+__pycache__/
+*.pyc
 .venv/
 backend/.venv/
+backend/.env

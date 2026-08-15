@@ -19,6 +19,7 @@ The ESP32 RFID Attendance System aims to deliver a resume-quality, robust IoT sy
 - Unknown card rejection to prevent unauthorized logging.
 - OLED user feedback with personalized greeting and attendance status.
 - Local-only REST synchronization when Wi-Fi and the backend are available.
+- Attendance sync endpoints are protected by a shared `X-API-Key` between the firmware and backend.
 
 ---
 
@@ -47,7 +48,7 @@ Embedded systems design in academic and hobbyist settings often relies on copy-p
 - [x] Persistent User Storage
 - [x] Attendance Session Manager
 - [x] Wi-Fi Synchronization
-- [x] Backend API (Bootstrap)
+- [x] Backend API (API-key Auth)
 - [x] REST API Client
 - [ ] Attendance Logs
 - [ ] Web Dashboard
@@ -119,6 +120,12 @@ Development is now performed using PlatformIO with Visual Studio Code.
 - ESP32 Dev Module
 - Arduino Framework
 
+Firmware configuration files are kept as local copies of example files:
+
+- Copy `firmware/attendance_system/include/wifi_credentials.h.example` to `wifi_credentials.h`
+- Copy `firmware/attendance_system/include/backend_config.h.example` to `backend_config.h`
+- Set the Wi-Fi credentials, backend host, backend port, and shared API key locally before building
+
 Required libraries:
 
 - MFRC522
@@ -160,19 +167,26 @@ ESP32-RFID-Attendance-System/
 ├── README.md
 ├── CHANGELOG.md
 ├── backend/
+│   ├── .env.example
 │   ├── README.md
 │   ├── requirements.txt
 │   └── app/
 │       ├── __init__.py
+│       ├── auth.py
+│       ├── config.py
 │       ├── main.py
-│       └── models.py
+│       ├── models.py
+│       └── routes/
+│           ├── __init__.py
+│           ├── attendance.py
+│           └── health.py
 ├── firmware/
 │   └── attendance_system/
 │       ├── platformio.ini
 │       ├── include/
 │       │   ├── application_controller.h
 │       │   ├── attendance_manager.h
-│       │   ├── backend_config.h
+│       │   ├── backend_config.h.example
 │       │   ├── display_manager.h
 │       │   ├── rest_client.h
 │       │   ├── rfid_service.h

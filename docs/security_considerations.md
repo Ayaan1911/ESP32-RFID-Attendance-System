@@ -1,7 +1,7 @@
 # Security Considerations
 
-The backend currently has no authentication and is intended for local-network testing only. Any device on the same network can read or write attendance data. This must be addressed before any internet exposure or the v2.0 hardened backend milestone.
+The `/attendance` endpoints are now protected by a static shared API key sent in the `X-API-Key` header by the firmware and validated by the backend. That is acceptable for local-network testing, but it does not provide rotation, revocation, or per-device identity. A production or multi-device deployment would need real device credentials and stronger transport security.
 
-The REST client added in v1.4 sends attendance events over plain, unauthenticated HTTP. That is acceptable for local-network testing only and must be hardened with HTTPS/TLS plus device authentication before any production or shared-network use. This is also the first milestone that transmits data off-device, making it the natural point to define device identity for future authentication design.
+The REST client still sends attendance events over plain HTTP. API-key authentication reduces casual unauthorized access, but it does not encrypt traffic or stop replay/sniffing on an untrusted network. HTTPS/TLS is still required before any internet exposure or shared-network deployment.
 
 The v1.5 offline sync queue keeps pending attendance events in plaintext RAM only. It is not persisted across reboot, so an outage followed by a reboot will lose any queued events. That limitation is documented here and is not fixed in this milestone.
