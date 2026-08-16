@@ -1,4 +1,4 @@
-﻿# ESP32 RFID Attendance System
+# ESP32 RFID Attendance System
 
 [![Platform: ESP32](https://img.shields.io/badge/Platform-ESP32-blue?style=for-the-badge&logo=espressif)](https://www.espressif.com/)
 [![Language: C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B)](https://isocpp.org/)
@@ -52,7 +52,7 @@ Embedded systems design in academic and hobbyist settings often relies on copy-p
 - [x] Backend API (API-key Auth)
 - [x] REST API Client
 - [ ] Attendance Logs
-- [ ] Web Dashboard
+- [x] Web Dashboard
 
 ---
 
@@ -181,6 +181,20 @@ ESP32-RFID-Attendance-System/
 │           ├── __init__.py
 │           ├── attendance.py
 │           └── health.py
+├── frontend/
+│   ├── README.md
+│   ├── index.html
+│   ├── package.json
+│   ├── postcss.config.js
+│   ├── tailwind.config.js
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   ├── vite.config.ts
+│   └── src/
+│       ├── App.tsx
+│       ├── index.css
+│       ├── main.tsx
+│       └── types.ts
 ├── firmware/
 │   └── attendance_system/
 │       ├── platformio.ini
@@ -213,6 +227,12 @@ ESP32-RFID-Attendance-System/
     │   └── hardware_validation_log.md
     └── security_considerations.md
 ```
+
+---
+
+## Web Dashboard
+
+The `frontend/` app is a read-only React dashboard for viewing live attendance events from `GET /attendance`. It prompts for the shared API key at session start, keeps that key only in memory, auto-refreshes every 10 seconds, and shows a security-style table plus summary metrics for the current event feed.
 
 ---
 
