@@ -3,159 +3,141 @@
 [![Platform: ESP32](https://img.shields.io/badge/Platform-ESP32-blue?style=for-the-badge&logo=espressif)](https://www.espressif.com/)
 [![Language: C++](https://img.shields.io/badge/Language-C%2B%2B-00599C?style=for-the-badge&logo=c%2B%2B)](https://isocpp.org/)
 [![Platform: PlatformIO](https://img.shields.io/badge/Platform-PlatformIO-orange?style=for-the-badge&logo=platformio)](https://platformio.org/)
+[![Backend: FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![Database: PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-4169E1?style=for-the-badge&logo=postgresql)](https://www.postgresql.org/)
+[![Frontend: React](https://img.shields.io/badge/Frontend-React-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
-[![Status: Firmware Development](https://img.shields.io/badge/Status-Firmware_Development-blue?style=for-the-badge)](docs/development/hardware_validation_log.md)
 
-A professional, modular RFID-based attendance logging system developed on the ESP32 platform. This project is built incrementally, prioritizing clean software engineering principles, clear hardware decoupling, documentation-first validation, and a clear path toward backend synchronization and dashboard analytics.
+A full-stack IoT attendance platform built around an ESP32 and an MFRC522 RFID reader � from embedded firmware, through an authenticated REST API and PostgreSQL persistence, to a live-updating React dashboard. Built incrementally as a structured engineering exercise: one responsibility per milestone, hardware-verified at every step, security considerations documented throughout rather than bolted on at the end.
 
----
-
-## Project Overview
-
-The ESP32 RFID Attendance System aims to deliver a resume-quality, robust IoT system. The initial hardware setup features an ESP32 microcontroller, an SPI-based MFRC522 RFID reader, and an I2C-based SSD1306 OLED display. The repository now contains both `firmware/` for the embedded PlatformIO project and `backend/` for the FastAPI attendance service used during local-network testing. Current firmware work spans local storage, Wi-Fi connectivity, and an additive REST API client that syncs attendance events without changing the local marking flow.
-
-### Key Features
-- Registered user authentication against an internal user database.
-- Unknown card rejection to prevent unauthorized logging.
-- OLED user feedback with personalized greeting and attendance status.
-- Local-only REST synchronization when Wi-Fi and the backend are available.
-- Attendance sync endpoints are protected by a shared `X-API-Key` between the firmware and backend.
-- Attendance history is now persisted in PostgreSQL on the backend.
+**Stack:** ESP32 (C++/PlatformIO) ? FastAPI (Python) ? PostgreSQL ? React (TypeScript/Tailwind)
 
 ---
 
-## Motivation
+## What it does
 
-Embedded systems design in academic and hobbyist settings often relies on copy-paste code and monolithic, unmaintainable Arduino sketches. This project treats the ESP32 platform like a professional IoT node:
-- Clean separation of concerns between drivers, logic, and networking.
-- Strict state management using finite state machines.
-- Traceability via hardware logs and changelogs.
-- Scalability toward a future dashboard-backed workflow.
+A person scans an RFID card. The ESP32 identifies them, marks attendance locally on an OLED display, and syncs the event over WiFi to a backend server � which persists it in PostgreSQL and serves it to a live dashboard that updates automatically, no refresh needed. If the network or backend is unavailable, the device keeps working offline and queues the event for retry once connectivity returns.
+
+An admin card switches the device into registration mode for enrolling new users on the spot, with duplicate-registration and duplicate-attendance safeguards built in at the firmware level.
 
 ---
 
-## Development Roadmap
+## Key Features
 
-- [x] Repository Scaffold
-- [x] Hardware Validation
-- [x] System Boot Sequence
-- [x] RFID Service
-- [x] Application Controller
-- [x] User Management
-- [x] Duplicate Attendance Prevention
-- [x] Admin Mode
-- [x] Dynamic User Registration
-- [x] Duplicate User Registration Prevention
-- [x] Persistent User Storage
-- [x] Attendance Session Manager
-- [x] Wi-Fi Synchronization
-- [x] Backend API (API-key Auth)
-- [x] REST API Client
-- [ ] Attendance Logs
-- [x] Web Dashboard
+- **Registered user authentication** against an on-device user database, with unknown-card rejection
+- **Admin-triggered registration mode** for enrolling new users without reflashing firmware
+- **Duplicate prevention** for both attendance marking and user registration
+- **Offline-first networking** � WiFi/backend outages don't stop local attendance marking; failed syncs queue in memory and retry automatically once connectivity returns
+- **Authenticated REST sync** � attendance events are pushed to the backend over HTTP with a shared API key, not open on the network
+- **Persistent attendance history** in PostgreSQL, surviving backend restarts
+- **Live dashboard** � auto-refreshing React frontend showing real-time attendance as it happens, with summary stats and a clean data-table view
 
 ---
 
-## Current Architecture
+## Architecture
 
 ```mermaid
-graph TD
-    FW[Firmware / PlatformIO] --> AC[application_controller]
-    AC --> RFID[rfid_service]
-    AC --> AM[attendance_manager]
-    AC --> UM[user_manager]
-    AC --> SM[storage_manager]
-    AC --> DM[display_manager]
-    AC --> WM[wifi_manager]
-    AM --> RC[rest_client]
-    RC --> BE[backend/ FastAPI service]
+graph LR
+    subgraph Firmware [ESP32 Firmware]
+        RFID[rfid_service] --> AC[application_controller]
+        AC --> UM[user_manager]
+        AC --> AM[attendance_manager]
+        UM --> SM[storage_manager<br/>NVS Flash]
+        AC --> DM[display_manager<br/>OLED]
+        AC --> WM[wifi_manager]
+        AM --> RC[rest_client]
+        RC --> SQ[sync_queue<br/>offline retry]
+    end
 
-    style FW fill:#4C6FFF,stroke:#2F4FD4,stroke-width:2px,color:#fff
-    style AC fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style RFID fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style AM fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style UM fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style SM fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style DM fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style WM fill:#4CAF50,stroke:#388E3C,stroke-width:2px,color:#fff
-    style RC fill:#FF9800,stroke:#EF6C00,stroke-width:2px,color:#fff
-    style BE fill:#9E9E9E,stroke:#757575,stroke-width:2px,color:#fff
+    RC -->|"HTTPS + API Key"| BE
+
+    subgraph Backend [FastAPI Backend]
+        BE[REST API] --> DB[(PostgreSQL)]
+    end
+
+    subgraph Dashboard [React Dashboard]
+        FE[Live Attendance View]
+    end
+
+    BE -->|"GET /attendance"| FE
+
+    style Firmware fill:#1e293b,stroke:#4C6FFF,stroke-width:2px,color:#fff
+    style Backend fill:#1e293b,stroke:#009688,stroke-width:2px,color:#fff
+    style Dashboard fill:#1e293b,stroke:#61DAFB,stroke-width:2px,color:#fff
 ```
 
-This modular pipeline establishes that:
-1. `application_controller` coordinates boot and scan-time state transitions.
-2. `rfid_service` handles card detection and UID extraction.
-3. `attendance_manager` owns local attendance marking and the additive REST sync call.
-4. `user_manager` handles lookup and registration of users.
-5. `storage_manager` persists user records in ESP32 non-volatile storage.
-6. `display_manager` renders the user-facing OLED messages.
-7. `wifi_manager` manages connection state and exposes `isWiFiConnected()`.
-8. `rest_client` POSTs attendance events to the FastAPI backend when Wi-Fi is available.
-9. `backend/` is a sibling FastAPI component used for local-network attendance testing and future expansion.
+**Firmware layer** (`firmware/`) � modular embedded C++ on PlatformIO. Each module owns one responsibility: RFID driver, display, persistent storage, user management, attendance logic, WiFi state, REST sync, and an offline retry queue � coordinated by a thin application controller.
+
+**Backend layer** (`backend/`) � FastAPI service with API-key-protected endpoints, backed by PostgreSQL via SQLAlchemy. Runs locally via Docker Compose.
+
+**Frontend layer** (`frontend/`) � React + TypeScript + Tailwind dashboard, session-based API key auth, polling the backend every 10 seconds for live updates.
+
+---
+
+## Quick Start
+
+Requires: PlatformIO (VS Code extension), Python 3.11+, Node.js, Docker Desktop.
+
+**1. Database**
+```bash
+docker compose up -d
+```
+
+**2. Backend**
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate          # Windows
+pip install -r requirements.txt
+copy .env.example .env          # then fill in API_KEY and Postgres credentials
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+**3. Dashboard**
+```bash
+cd frontend
+npm install
+npm run dev                     # http://localhost:5173
+```
+
+**4. Firmware**
+```bash
+cd firmware/attendance_system
+# Copy include/wifi_credentials.h.example -> wifi_credentials.h and fill in your WiFi
+# Copy include/backend_config.h.example -> backend_config.h and fill in host/port/API key
+pio run --target upload
+```
+
+Full setup detail for each layer lives in that component's own README (`backend/README.md`, `frontend/README.md`).
+
+---
+
+## Development Philosophy
+
+This project is built the way a real embedded/software team would build it, not as a single weekend hack:
+
+- **One responsibility per module, one responsibility per commit** � every milestone is isolated, hardware-verified, and independently revertable
+- **Build ? Upload ? Hardware Test ? Commit ? Push**, no exceptions � nothing gets committed on "should work," only on confirmed hardware behavior
+- **Security considered at every layer, not just claimed** � see [`docs/security_considerations.md`](docs/security_considerations.md) for an honest, running log of what's protected, what isn't yet, and why
+- **Defensive, explicit code** � no hardcoded pins, no magic numbers, credentials and secrets kept out of git via `.gitignore`'d local config files with committed `.example` templates
+
+---
+
+## Security Notes
+
+This is a local-network hobby/portfolio project, not a production security product � and the README says so honestly rather than overclaiming. Known, documented limitations include: RFID UID cloning is not mitigated at the hardware level, the REST API uses a static shared key rather than per-device credentials, and traffic is plain HTTP rather than TLS. Full details and reasoning in [`docs/security_considerations.md`](docs/security_considerations.md) � treating this as a living document was a deliberate practice throughout the build, not an afterthought.
 
 ---
 
 ## System Specifications
 
-### Hardware Inventory
-- Microcontroller: ESP32 Dev Module (WROOM-32 Core)
-- RFID Reader: MFRC522 (13.56 MHz RFID transceiver)
-- Display: SSD1306 OLED (0.96" 128x64 display, I2C interface)
-- Access Credentials: Mifare Classic 1K RFID cards and key fobs
+**Hardware:** ESP32 Dev Module (WROOM-32) � MFRC522 RFID reader (13.56 MHz, SPI) � SSD1306 OLED (0.96", I2C) � Mifare Classic 1K cards/fobs
 
-### Software Stack
-- IDE / Build System: VS Code and PlatformIO
-- Framework: Arduino ESP32 Framework
-- Core Library Dependencies:
-  - `Adafruit SSD1306`
-  - `Adafruit GFX Library`
-  - `MFRC522`
+**Firmware:** C++ / Arduino framework / PlatformIO � `MFRC522`, `Adafruit SSD1306`, `Adafruit GFX Library`
 
----
+**Backend:** Python / FastAPI / SQLAlchemy / PostgreSQL 16 (Docker) / python-dotenv
 
-## Development Environment
-
-Development is now performed using PlatformIO with Visual Studio Code.
-
-- PlatformIO
-- ESP32 Dev Module
-- Arduino Framework
-
-Firmware configuration files are kept as local copies of example files:
-
-- Copy `firmware/attendance_system/include/wifi_credentials.h.example` to `wifi_credentials.h`
-- Copy `firmware/attendance_system/include/backend_config.h.example` to `backend_config.h`
-- Set the Wi-Fi credentials, backend host, backend port, and shared API key locally before building
-
-Required libraries:
-
-- MFRC522
-- Adafruit SSD1306
-- Adafruit GFX Library
-
----
-
-## High-Level Architecture
-
-The system uses an event-driven loop that separates driver execution from high-level state decisions. Detail specifications are documented in [docs/architecture_and_design.md](docs/architecture_and_design.md).
-
-```text
-+---------------------------------------------------------+
-|                  Application Loop                       |
-+---------------------------------------------------------+
-                           |
-                           v
-+---------------------------------------------------------+
-|                Finite State Machine                     |
-|  (BOOTING -> IDLE -> SCANNING -> VALIDATING -> ALERTS)  |
-+---------------------------------------------------------+
-        |                                       |
-        v                                       v
-+-----------------------+               +-----------------+
-|   MFRC522 RFID SPI    |               | SSD1306 OLED I2C|
-|   Driver Interface    |               |  UI Render Box  |
-+-----------------------+               +-----------------+
-```
+**Frontend:** React / TypeScript / Vite / Tailwind CSS
 
 ---
 
@@ -163,94 +145,45 @@ The system uses an event-driven loop that separates driver execution from high-l
 
 ```text
 ESP32-RFID-Attendance-System/
-├── .gitignore
-├── LICENSE
-├── README.md
-├── CHANGELOG.md
-├── backend/
-│   ├── .env.example
-│   ├── README.md
-│   ├── requirements.txt
-│   └── app/
-│       ├── __init__.py
-│       ├── auth.py
-│       ├── config.py
-│       ├── main.py
-│       ├── models.py
-│       └── routes/
-│           ├── __init__.py
-│           ├── attendance.py
-│           └── health.py
-├── frontend/
-│   ├── README.md
-│   ├── index.html
-│   ├── package.json
-│   ├── postcss.config.js
-│   ├── tailwind.config.js
-│   ├── tsconfig.json
-│   ├── tsconfig.node.json
-│   ├── vite.config.ts
-│   └── src/
-│       ├── App.tsx
-│       ├── index.css
-│       ├── main.tsx
-│       └── types.ts
-├── firmware/
-│   └── attendance_system/
-│       ├── platformio.ini
-│       ├── include/
-│       │   ├── application_controller.h
-│       │   ├── attendance_manager.h
-│       │   ├── backend_config.h.example
-│       │   ├── display_manager.h
-│       │   ├── rest_client.h
-│       │   ├── rfid_service.h
-│       │   ├── storage_manager.h
-│       │   ├── user_manager.h
-│       │   ├── wifi_credentials.h.example
-│       │   └── wifi_manager.h
-│       └── src/
-│           ├── application_controller.cpp
-│           ├── attendance_manager.cpp
-│           ├── display_manager.cpp
-│           ├── main.cpp
-│           ├── rest_client.cpp
-│           ├── rfid_service.cpp
-│           ├── storage_manager.cpp
-│           ├── user_manager.cpp
-│           └── wifi_manager.cpp
-├── hardware/
-│   └── wiring.md
-└── docs/
-    ├── architecture_and_design.md
-    ├── development/
-    │   └── hardware_validation_log.md
-    └── security_considerations.md
++-- firmware/attendance_system/     # ESP32 embedded firmware (PlatformIO)
+�   +-- include/                    # Module headers
+�   +-- src/                        # Module implementations
++-- backend/                        # FastAPI REST API + PostgreSQL models
+�   +-- app/
+�       +-- routes/                 # /health, /attendance
+�       +-- auth.py                 # API-key verification
+�       +-- database.py             # SQLAlchemy engine/session
+�       +-- db_models.py            # AttendanceEvent table
++-- frontend/                       # React dashboard
+�   +-- src/
++-- hardware/                       # Wiring reference
++-- docs/                           # Architecture notes, security log, validation log
++-- docker-compose.yml              # Local PostgreSQL
++-- CHANGELOG.md
 ```
 
 ---
 
-## Web Dashboard
+## Development Roadmap
 
-The `frontend/` app is a read-only React dashboard for viewing live attendance events from `GET /attendance`. It prompts for the shared API key at session start, keeps that key only in memory, auto-refreshes every 10 seconds, and shows a security-style table plus summary metrics for the current event feed.
-
----
-
-## Development Philosophy
-
-- Modular design: driver-specific functions are encapsulated rather than scattered through raw loops.
-- Defensive programming: validate serial bounds, memory buffers, and connection integrity explicitly.
-- Explicit pin mapping: always map pins inside a unified file to avoid hardcoding pins in code.
+- [x] Modular embedded firmware (display, storage, RFID, user, attendance, application controller)
+- [x] Persistent on-device storage (NVS)
+- [x] Admin mode, dynamic registration, duplicate prevention
+- [x] WiFi connectivity with graceful offline fallback
+- [x] REST API client with offline sync queue
+- [x] Authenticated FastAPI backend
+- [x] PostgreSQL-backed persistent attendance history
+- [x] Live React dashboard
+- [ ] Face recognition as a secondary authentication method (planned)
 
 ---
 
 ## Contributing
 
-Contributions are welcome. Since this repository is a structured engineering portfolio, please open an Issue to discuss hardware mapping changes, alternative FSM implementations, or custom PCB layout reviews before submitting Pull Requests.
+This repository is a structured engineering portfolio. Open an issue to discuss hardware mapping changes, architectural alternatives, or improvements before submitting a pull request.
 
 ---
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
-
+[MIT License](LICENSE)
